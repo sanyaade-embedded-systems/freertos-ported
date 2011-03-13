@@ -59,17 +59,26 @@
  *----------------------------------------------------------*/
 
 /*
+	Changes from V2.5.2
+		
+	+ The critical section management functions have been changed.  These no
+	  longer modify the stack and are safe to use at all optimisation levels.
+	  The functions are now also the same for both ARM and THUMB modes.
+
+	Changes from V2.6.0
+
+	+ Removed the 'static' from the definition of vNonPreemptiveTick() to 
+	  allow the demo to link when using the cooperative scheduler.
+
 	Changes from V3.2.4
 
 	+ The assembler statements are now included in a single asm block rather
 	  than each line having its own asm block.
 */
 
+
 /* Scheduler includes. */
 #include "FreeRTOS.h"
-#include "task.h"
-
-#include "AT91SAM7X256.h"
 
 /* Constants required to handle interrupts. */
 #define portTIMER_MATCH_ISR_BIT		( ( unsigned char ) 0x01 )
@@ -112,13 +121,13 @@ void vPortYieldProcessor( void )
 	/* Within an IRQ ISR the link register has an offset from the true return 
 	address, but an SWI ISR does not.  Add the offset manually so the same 
 	ISR return code can be used in both cases. */
-	asm volatile ( "ADD		LR, LR, #4" );
+	__asm volatile ( "ADD		LR, LR, #4" );
 
 	/* Perform the context switch.  First save the context of the current task. */
 	portSAVE_CONTEXT();
 
 	/* Find the highest priority task that is ready to run. */
-	vTaskSwitchContext();
+	__asm volatile ( "bl vTaskSwitchContext" );
 
 	/* Restore the context of the new task. */
 	portRESTORE_CONTEXT();	
@@ -126,54 +135,29 @@ void vPortYieldProcessor( void )
 /*-----------------------------------------------------------*/
 
 /* 
- * The ISR used for the scheduler tick depends on whether the cooperative or
- * the preemptive scheduler is being used.
+ * The ISR used for the scheduler tick.
  */
+void vTickISR( void ) __attribute__((naked));
+void vTickISR( void )
+{
+	/* Save the context of the interrupted task. */
+	portSAVE_CONTEXT();	
 
-#if configUSE_PREEMPTION == 0
+	/* Increment the RTOS tick count, then look for the highest priority 
+	task that is ready to run. */
+	__asm volatile( "bl vTaskIncrementTick" );
 
-	/* The cooperative scheduler requires a normal IRQ service routine to 
-	simply increment the system tick. */
-	void vNonPreemptiveTick( void ) __attribute__ ((interrupt ("IRQ")));
-	void vNonPreemptiveTick( void )
-	{		
-		unsigned long ulDummy;
-		
-		/* Increment the tick count - which may wake some tasks but as the
-		preemptive scheduler is not being used any woken task is not given
-		processor time no matter what its priority. */
-		vTaskIncrementTick();
-		
-		/* Clear the PIT interrupt. */
-		ulDummy = AT91C_BASE_PITC->PITC_PIVR;
-		
-		/* End the interrupt in the AIC. */
-		AT91C_BASE_AIC->AIC_EOICR = ulDummy;
-	}
+	#if configUSE_PREEMPTION == 1
+		__asm volatile( "bl vTaskSwitchContext" );
+	#endif
 
-#else
-
-	/* The preemptive scheduler is defined as "naked" as the full context is
-	saved on entry as part of the context switch. */
-	void vPreemptiveTick( void ) __attribute__((naked));
-	void vPreemptiveTick( void )
-	{
-		/* Save the context of the current task. */
-		portSAVE_CONTEXT();			
-
-		/* Increment the tick count - this may wake a task. */
-		vTaskIncrementTick();
-
-		/* Find the highest priority task that is ready to run. */
-		vTaskSwitchContext();
-		
-		/* End the interrupt in the AIC. */
-		AT91C_BASE_AIC->AIC_EOICR = AT91C_BASE_PITC->PITC_PIVR;;
-		
-		portRESTORE_CONTEXT();
-	}
-
-#endif
+	/* Ready for the next interrupt. */
+	//T0_IR = portTIMER_MATCH_ISR_BIT;
+	//VICVectAddr = portCLEAR_VIC_INTERRUPT;
+	
+	/* Restore the context of the new task. */
+	portRESTORE_CONTEXT();
+}
 /*-----------------------------------------------------------*/
 
 /*
@@ -182,31 +166,34 @@ void vPortYieldProcessor( void )
  * ensure a switch to ARM mode.  When THUMB_INTERWORK is not defined then
  * the utilities are defined as macros in portmacro.h - as per other ports.
  */
-void vPortDisableInterruptsFromThumb( void ) __attribute__ ((naked));
-void vPortEnableInterruptsFromThumb( void ) __attribute__ ((naked));
+#ifdef THUMB_INTERWORK
 
-void vPortDisableInterruptsFromThumb( void )
-{
-	asm volatile ( 
-		"STMDB	SP!, {R0}		\n\t"	/* Push R0.									*/
-		"MRS	R0, CPSR		\n\t"	/* Get CPSR.								*/
-		"ORR	R0, R0, #0xC0	\n\t"	/* Disable IRQ, FIQ.						*/
-		"MSR	CPSR, R0		\n\t"	/* Write back modified value.				*/
-		"LDMIA	SP!, {R0}		\n\t"	/* Pop R0.									*/
-		"BX		R14" );					/* Return back to thumb.					*/
-}
-		
-void vPortEnableInterruptsFromThumb( void )
-{
-	asm volatile ( 
-		"STMDB	SP!, {R0}		\n\t"	/* Push R0.									*/	
-		"MRS	R0, CPSR		\n\t"	/* Get CPSR.								*/	
-		"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.							*/	
-		"MSR	CPSR, R0		\n\t"	/* Write back modified value.				*/	
-		"LDMIA	SP!, {R0}		\n\t"	/* Pop R0.									*/
-		"BX		R14" );					/* Return back to thumb.					*/
-}
+	void vPortDisableInterruptsFromThumb( void ) __attribute__ ((naked));
+	void vPortEnableInterruptsFromThumb( void ) __attribute__ ((naked));
 
+	void vPortDisableInterruptsFromThumb( void )
+	{
+		__asm volatile ( 
+			"STMDB	SP!, {R0}		\n\t"	/* Push R0.									*/
+			"MRS	R0, CPSR		\n\t"	/* Get CPSR.								*/
+			"ORR	R0, R0, #0xC0	\n\t"	/* Disable IRQ, FIQ.						*/
+			"MSR	CPSR, R0		\n\t"	/* Write back modified value.				*/
+			"LDMIA	SP!, {R0}		\n\t"	/* Pop R0.									*/
+			"BX		R14" );					/* Return back to thumb.					*/
+	}
+			
+	void vPortEnableInterruptsFromThumb( void )
+	{
+		__asm volatile ( 
+			"STMDB	SP!, {R0}		\n\t"	/* Push R0.									*/	
+			"MRS	R0, CPSR		\n\t"	/* Get CPSR.								*/	
+			"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.							*/	
+			"MSR	CPSR, R0		\n\t"	/* Write back modified value.				*/	
+			"LDMIA	SP!, {R0}		\n\t"	/* Pop R0.									*/
+			"BX		R14" );					/* Return back to thumb.					*/
+	}
+
+#endif /* THUMB_INTERWORK */
 
 /* The code generated by the GCC compiler uses the stack in different ways at
 different optimisation levels.  The interrupt flags can therefore not always
@@ -215,7 +202,7 @@ in a variable, which is then saved as part of the stack context. */
 void vPortEnterCritical( void )
 {
 	/* Disable interrupts as per portDISABLE_INTERRUPTS(); 							*/
-	asm volatile ( 
+	__asm volatile ( 
 		"STMDB	SP!, {R0}			\n\t"	/* Push R0.								*/
 		"MRS	R0, CPSR			\n\t"	/* Get CPSR.							*/
 		"ORR	R0, R0, #0xC0		\n\t"	/* Disable IRQ, FIQ.					*/
@@ -240,7 +227,7 @@ void vPortExitCritical( void )
 		if( ulCriticalNesting == portNO_CRITICAL_NESTING )
 		{
 			/* Enable interrupts as per portEXIT_CRITICAL().					*/
-			asm volatile ( 
+			__asm volatile ( 
 				"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	
 				"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	
 				"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.				*/	
@@ -249,4 +236,3 @@ void vPortExitCritical( void )
 		}
 	}
 }
-

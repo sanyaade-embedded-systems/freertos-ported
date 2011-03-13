@@ -73,5 +73,10 @@ void vParTestInitialise( void )
 {
 	struct gpio *gpio5_base = (struct gpio *)GPIO5_BASE;
 	struct gpio *gpio6_base = (struct gpio *)GPIO6_BASE;
+
+	/* GPIO5: 31,30,29,28,22,21
+	 * GPIO6: 23,10,08,02,01 */
+	gpio5_base->oe=PIN31|PIN30|PIN29|PIN28|PIN22|PIN21;
+	gpio6_base->oe=PIN23|PIN10|PIN8|PIN2|PIN1;
 }
 

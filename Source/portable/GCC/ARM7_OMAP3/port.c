@@ -53,13 +53,13 @@
 
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the Atmel AT91R40008
- * port.
+ * Implementation of functions defined in portable.h for the ARM7 port.
  *
  * Components that can be compiled to either ARM or THUMB mode are
  * contained in this file.  The ISR routines, which can only be compiled
  * to ARM mode are contained in portISR.c.
  *----------------------------------------------------------*/
+
 
 /* Standard includes. */
 #include <stdlib.h>
@@ -68,18 +68,23 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Hardware specific definitions. */
-#include "AT91R40008.h"
-#include "pio.h"
-#include "aic.h"
-#include "tc.h"
-
 /* Constants required to setup the task context. */
 #define portINITIAL_SPSR				( ( portSTACK_TYPE ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
 #define portTHUMB_MODE_BIT				( ( portSTACK_TYPE ) 0x20 )
 #define portINSTRUCTION_SIZE			( ( portSTACK_TYPE ) 4 )
 #define portNO_CRITICAL_SECTION_NESTING	( ( portSTACK_TYPE ) 0 )
-#define portTICK_PRIORITY_6				( 6 )
+
+/* Constants required to setup the tick ISR. */
+#define portENABLE_TIMER			( ( unsigned char ) 0x01 )
+#define portPRESCALE_VALUE			0x00
+#define portINTERRUPT_ON_MATCH		( ( unsigned long ) 0x01 )
+#define portRESET_COUNT_ON_MATCH	( ( unsigned long ) 0x02 )
+
+/* Constants required to setup the VIC for the tick ISR. */
+#define portTIMER_VIC_CHANNEL		( ( unsigned long ) 0x0004 )
+#define portTIMER_VIC_CHANNEL_BIT	( ( unsigned long ) 0x0010 )
+#define portTIMER_VIC_ENABLE		( ( unsigned long ) 0x0020 )
+
 /*-----------------------------------------------------------*/
 
 /* Setup the timer to generate the tick interrupts. */
@@ -152,12 +157,11 @@ portSTACK_TYPE *pxOriginalTOS;
 	system mode, with interrupts enabled. */
 	*pxTopOfStack = ( portSTACK_TYPE ) portINITIAL_SPSR;
 
-	#ifdef THUMB_INTERWORK
+	if( ( ( unsigned long ) pxCode & 0x01UL ) != 0x00 )
 	{
 		/* We want the task to start in thumb mode. */
 		*pxTopOfStack |= portTHUMB_MODE_BIT;
 	}
-	#endif
 
 	pxTopOfStack--;
 
@@ -193,68 +197,17 @@ void vPortEndScheduler( void )
 /*-----------------------------------------------------------*/
 
 /*
- * Setup the tick timer to generate the tick interrupts at the required frequency.
+ * Setup the timer 0 to generate the tick interrupts at the required frequency.
  */
 static void prvSetupTimerInterrupt( void )
 {
-volatile unsigned long ulDummy;
+unsigned long ulCompareMatch;
+extern void ( vTickISR )( void );
+	
+	/* The interrupt timer is already configured by uboot
+	 * therefore I can't do much here */
 
-	/* Enable clock to the tick timer... */
-	AT91C_BASE_PS->PS_PCER = portTIMER_CLK_ENABLE_BIT;
-
-	/* Stop the tick timer... */
-	portTIMER_REG_BASE_PTR->TC_CCR = TC_CLKDIS;
-
-	/* Start with tick timer interrupts disabled... */
-	portTIMER_REG_BASE_PTR->TC_IDR = 0xFFFFFFFF;
-
-	/* Clear any pending tick timer interrupts... */
-	ulDummy = portTIMER_REG_BASE_PTR->TC_SR;
-
-	/* Store interrupt handler function address in tick timer vector register...
-	The ISR installed depends on whether the preemptive or cooperative
-	scheduler is being used. */
-	#if configUSE_PREEMPTION == 1
-	{
-		extern void ( vPreemptiveTick )( void );
-		AT91C_BASE_AIC->AIC_SVR[portTIMER_AIC_CHANNEL] = ( unsigned long ) vPreemptiveTick;
-	}
-	#else  // else use cooperative scheduler
-	{
-		extern void ( vNonPreemptiveTick )( void );
-		AT91C_BASE_AIC->AIC_SVR[portTIMER_AIC_CHANNEL] = ( unsigned long ) vNonPreemptiveTick;
-	}
-	#endif
-
-	/* Tick timer interrupt level-sensitive, priority 6... */
-	AT91C_BASE_AIC->AIC_SMR[ portTIMER_AIC_CHANNEL ] = AIC_SRCTYPE_INT_LEVEL_SENSITIVE | portTICK_PRIORITY_6;
-
-	/* Enable the tick timer interrupt...
-
-	First at timer level */
-	portTIMER_REG_BASE_PTR->TC_IER = TC_CPCS;
-
-	/* Then at the AIC level. */
-	AT91C_BASE_AIC->AIC_IECR = (1 << portTIMER_AIC_CHANNEL);
-
-	/* Calculate timer compare value to achieve the desired tick rate... */
-	if( (configCPU_CLOCK_HZ / (configTICK_RATE_HZ * 2) ) <= 0xFFFF )
-	{
-		/* The tick rate is fast enough for us to use the faster timer input
-		clock (main clock / 2). */
-		portTIMER_REG_BASE_PTR->TC_CMR = TC_WAVE | TC_CLKS_MCK2 | TC_BURST_NONE | TC_CPCTRG;
-		portTIMER_REG_BASE_PTR->TC_RC  = configCPU_CLOCK_HZ / (configTICK_RATE_HZ * 2);
-	}
-	else
-	{
-		/* We must use a slower timer input clock (main clock / 8) because the
-		tick rate is too slow for the faster input clock. */
-		portTIMER_REG_BASE_PTR->TC_CMR = TC_WAVE | TC_CLKS_MCK8 | TC_BURST_NONE | TC_CPCTRG;
-		portTIMER_REG_BASE_PTR->TC_RC  = configCPU_CLOCK_HZ / (configTICK_RATE_HZ * 8);
-	}
-
-	/* Start tick timer... */
-	portTIMER_REG_BASE_PTR->TC_CCR = TC_SWTRG | TC_CLKEN;
-}
 /*-----------------------------------------------------------*/
+}
+
 
