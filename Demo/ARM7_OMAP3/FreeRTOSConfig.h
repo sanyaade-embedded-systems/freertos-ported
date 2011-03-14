@@ -51,32 +51,52 @@
     licensing and training services.
 */
 
-/*
-	Changes from V2.5.2
-		
-	+ All LED's are turned off to start.
-*/
+#ifndef FREERTOS_CONFIG_H
+#define FREERTOS_CONFIG_H
 
+#include <omap3.h>
 
-#include "FreeRTOS.h"
-#include "partest.h"
-
-#define partstFIRST_IO			( ( unsigned long ) 0x400 )
-#define partstNUM_LEDS			( 4 )
-#define partstALL_OUTPUTS_OFF	( ( unsigned long ) 0xffffffff )
 
 /*-----------------------------------------------------------
- * Simple parallel port IO routines.
- *-----------------------------------------------------------*/
+ * Application specific definitions.
+ *
+ * These definitions should be adjusted for your particular hardware and
+ * application requirements.
+ *
+ * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
+ * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE. 
+ *
+ * See http://www.freertos.org/a00110.html.
+ *----------------------------------------------------------*/
 
-void vParTestInitialise( void )
-{
-	struct gpio *gpio5_base = (struct gpio *)GPIO5_BASE;
-	struct gpio *gpio6_base = (struct gpio *)GPIO6_BASE;
+#define configUSE_PREEMPTION		1
+#define configUSE_IDLE_HOOK			0
+#define configUSE_TICK_HOOK			0
+#define configCPU_CLOCK_HZ			( ( unsigned long ) 58982400 )	/* =14.7456MHz xtal multiplied by 4 using the PLL. */
+#define configTICK_RATE_HZ			( ( portTickType ) 1000 )
+#define configMAX_PRIORITIES		( ( unsigned portBASE_TYPE ) 5 )
+#define configMINIMAL_STACK_SIZE	( ( unsigned short ) 128 )
+#define configTOTAL_HEAP_SIZE		( ( size_t ) ( 24 * 1024 ) )
+#define configMAX_TASK_NAME_LEN		( 16 )
+#define configUSE_TRACE_FACILITY	0
+#define configUSE_16_BIT_TICKS		0
+#define configIDLE_SHOULD_YIELD		1
+#define configQUEUE_REGISTRY_SIZE	0
 
-	/* GPIO5: 31,30,29,28,22,21,15,14,13,12
-	 * GPIO6: 23,10,08,02,01 */
-	gpio5_base->oe=~(PIN31|PIN30|PIN29|PIN28|PIN22|PIN21|PIN15|PIN14|PIN13|PIN12);
-	gpio6_base->oe=~(PIN23|PIN10|PIN8|PIN2|PIN1);
-}
+/* Co-routine definitions. */
+#define configUSE_CO_ROUTINES 		0
+#define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
 
+/* Set the following definitions to 1 to include the API function, or zero
+to exclude the API function. */
+
+#define INCLUDE_vTaskPrioritySet		1
+#define INCLUDE_uxTaskPriorityGet		1
+#define INCLUDE_vTaskDelete				1
+#define INCLUDE_vTaskCleanUpResources	0
+#define INCLUDE_vTaskSuspend			1
+#define INCLUDE_vTaskDelayUntil			1
+#define INCLUDE_vTaskDelay				1
+
+
+#endif /* FREERTOS_CONFIG_H */

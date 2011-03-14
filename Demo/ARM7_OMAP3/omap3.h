@@ -22,12 +22,12 @@ Edited by Richard Barry.
 
 /* GPIO Structure */
 struct gpio{
-	unsigned char res1[0x34];
-	unsigned int oe;
-	unsigned int datain;
-	unsigned char res2[0x54];
-	unsigned int cleardataout;
-	unsigned int setdataout;
+	unsigned char res1[0x34];	//reserve 34bytes
+	unsigned int oe; 		//offset 0x34
+	unsigned int datain;		//offset 0x38
+	unsigned char res2[0x54];	//reserver 0x54bytes -> up to 0x8C
+	unsigned int cleardataout;	//offset 0x90
+	unsigned int setdataout;	//offset 0x94
 };
 
 #define REG32 (volatile unsigned int*)
@@ -189,38 +189,38 @@ struct gpio{
 
 /* define pins. I will use them for GPIO but I assume 
  * I can extent their usage for other modules as well */
-#define PIN1		(0x1 << 0)
-#define PIN2		(0x1 << 1)
-#define PIN3		(0x1 << 2)
-#define	PIN4		(0x1 << 3)
-#define PIN5		(0x1 << 4)
-#define PIN6		(0x1 << 5)
-#define PIN7		(0x1 << 6)
-#define PIN8		(0x1 << 7)
-#define PIN9		(0x1 << 8)
-#define PIN10		(0x1 << 9)
-#define PIN11		(0x1 << 10)
-#define PIN12		(0x1 << 11)
-#define PIN13		(0x1 << 12)
-#define PIN14		(0x1 << 13)
-#define PIN15		(0x1 << 14)
-#define PIN16		(0x1 << 15)
-#define PIN17		(0x1 << 16)
-#define PIN18		(0x1 << 17)
-#define PIN19		(0x1 << 18)
-#define PIN20		(0x1 << 19)
-#define PIN21		(0x1 << 20)
-#define PIN22		(0x1 << 21)
-#define PIN23		(0x1 << 22)
-#define PIN24		(0x1 << 23)
-#define PIN25		(0x1 << 24)
-#define PIN26		(0x1 << 25)
-#define PIN27		(0x1 << 26)
-#define PIN28		(0x1 << 27)
-#define PIN29		(0x1 << 28)
-#define PIN30		(0x1 << 29)
-#define PIN31		(0x1 << 30)
-#define PIN32		(0x1 << 31)
+#define PIN0		(0x1 << 0)
+#define PIN1		(0x1 << 1)
+#define PIN2		(0x1 << 2)
+#define	PIN3		(0x1 << 3)
+#define PIN4		(0x1 << 4)
+#define PIN5		(0x1 << 5)
+#define PIN6		(0x1 << 6)
+#define PIN7		(0x1 << 7)
+#define PIN8		(0x1 << 8)
+#define PIN9		(0x1 << 9)
+#define PIN10		(0x1 << 10)
+#define PIN11		(0x1 << 11)
+#define PIN12		(0x1 << 12)
+#define PIN13		(0x1 << 13)
+#define PIN14		(0x1 << 14)
+#define PIN15		(0x1 << 15)
+#define PIN16		(0x1 << 16)
+#define PIN17		(0x1 << 17)
+#define PIN18		(0x1 << 18)
+#define PIN19		(0x1 << 19)
+#define PIN20		(0x1 << 20)
+#define PIN21		(0x1 << 21)
+#define PIN22		(0x1 << 22)
+#define PIN23		(0x1 << 23)
+#define PIN24		(0x1 << 24)
+#define PIN25		(0x1 << 25)
+#define PIN26		(0x1 << 26)
+#define PIN27		(0x1 << 27)
+#define PIN28		(0x1 << 28)
+#define PIN29		(0x1 << 29)
+#define PIN30		(0x1 << 30)
+#define PIN31		(0x1 << 31)
 
 
 
