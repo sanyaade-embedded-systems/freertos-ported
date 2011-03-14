@@ -202,18 +202,18 @@ static void setleds ( void )
 	struct gpio *gpio5_base=(struct gpio *)GPIO5_BASE;
 	gpio5_base->setdataout = PIN22|PIN21;
 	while(times<10){
-		for(counter=0;counter<0xFFFF;counter++){}//delay
+		for(counter=0;counter<0x2FFFF;counter++){}//delay
 		counter=0;
 		gpio5_base->setdataout = PIN21;
-		for(counter=0;counter<0xFFFF;counter++){}
+		for(counter=0;counter<0x2FFFF;counter++){}
 		counter=0;
 		gpio5_base->cleardataout = PIN22|PIN21;
-		for(counter=0;counter<0xFFFF;counter++){}
+		for(counter=0;counter<0x2FFFF;counter++){}
 		counter=0;
 		gpio5_base->setdataout = PIN22;
-		for(counter=0;counter<0xFFFF;counter++){}//delay
+		for(counter=0;counter<0x2FFFF;counter++){}//delay
 		counter=0;
-		gpio5_base->cleardataout = PIN21|PIN21;
+		gpio5_base->cleardataout = PIN22|PIN21;
 		times++;
 	}
 }
