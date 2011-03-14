@@ -125,6 +125,8 @@ $(ARM_OBJ) : %.o : %.c $(LDSCRIPT) Makefile
 
 clean :
 	rm -rf $(ARM_OBJ) $(THUMB_OBJ)
+	rm -rf rmosdemo.elf rtosdemo.hex rtosdemo.map
+	rm -rf 
 	touch Makefile
 
 
