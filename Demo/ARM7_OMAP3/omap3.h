@@ -30,6 +30,160 @@ struct gpio{
 	unsigned int setdataout;	//offset 0x94
 };
 
+/* GP Timer Structure */
+struct gptimer {
+	int tidr;	/* 0x00 r */
+	char res[0xc];
+	int tiocp_cfg;	/* 0x10 rw */
+	int tistat;	/* 0x14 r */
+	int tisr;	/* 0x18 rw */
+	int tier;	/* 0x1c rw */
+	int twer;	/* 0x20 rw */
+	int tclr;	/* 0x24 rw */
+	int tcrr;	/* 0x28 rw */
+	int tldr;	/* 0x2c rw */
+	int ttgr;	/* 0x30 rw */
+	int twpc;	/* 0x34 r*/
+	int tmar;	/* 0x38 rw*/
+	int tcar1;	/* 0x3c r */
+	int tcicr;	/* 0x40 rw */
+	int tcar2;	/* 0x44 r */
+};
+
+struct InterruptController
+{
+  unsigned int intcSysConfig;
+  unsigned int intcSysStatus;
+  unsigned int intcSirIrq;
+  unsigned int intcSirFiq;
+  unsigned int intcControl;
+  unsigned int intcProtection;
+  unsigned int intcIdle;
+  unsigned int intcIrqPriority;
+  unsigned int intcFiqPriority;
+  unsigned int intcThreshold;
+  unsigned int intcItr0;
+  unsigned int intcItr1;
+  unsigned int intcItr2;
+  unsigned int intcMir0;
+  unsigned int intcMir1;
+  unsigned int intcMir2;
+  unsigned int intcMirClear0;
+  unsigned int intcMirClear1;
+  unsigned int intcMirClear2;
+  unsigned int intcMirSet0;
+  unsigned int intcMirSet1;
+  unsigned int intcMirSet2;
+  unsigned int intcIsrSet0;
+  unsigned int intcIsrSet1;
+  unsigned int intcIsrSet2;
+  unsigned int intcIsrClear0;
+  unsigned int intcIsrClear1;
+  unsigned int intcIsrClear2;
+  unsigned int intcPendingIrq0;
+  unsigned int intcPendingIrq1;
+  unsigned int intcPendingIrq2;
+  unsigned int intcPendingFiq0;
+  unsigned int intcPendingFiq1;
+  unsigned int intcPendingFiq2;
+  unsigned int intcIlr0;
+  unsigned int intcIlr1;
+  unsigned int intcIlr2;
+  unsigned int intcIlr3;
+  unsigned int intcIlr4;
+  unsigned int intcIlr5;
+  unsigned int intcIlr6;
+  unsigned int intcIlr7;
+  unsigned int intcIlr8;
+  unsigned int intcIlr9;
+  unsigned int intcIlr10;
+  unsigned int intcIlr11;
+  unsigned int intcIlr12;
+  unsigned int intcIlr13;
+  unsigned int intcIlr14;
+  unsigned int intcIlr15;
+  unsigned int intcIlr16;
+  unsigned int intcIlr17;
+  unsigned int intcIlr18;
+  unsigned int intcIlr19;
+  unsigned int intcIlr20;
+  unsigned int intcIlr21;
+  unsigned int intcIlr22;
+  unsigned int intcIlr23;
+  unsigned int intcIlr24;
+  unsigned int intcIlr25;
+  unsigned int intcIlr26;
+  unsigned int intcIlr27;
+  unsigned int intcIlr28;
+  unsigned int intcIlr29;
+  unsigned int intcIlr30;
+  unsigned int intcIlr31;
+  unsigned int intcIlr32;
+  unsigned int intcIlr33;
+  unsigned int intcIlr34;
+  unsigned int intcIlr35;
+  unsigned int intcIlr36;
+  unsigned int intcIlr37;
+  unsigned int intcIlr38;
+  unsigned int intcIlr39;
+  unsigned int intcIlr40;
+  unsigned int intcIlr41;
+  unsigned int intcIlr42;
+  unsigned int intcIlr43;
+  unsigned int intcIlr44;
+  unsigned int intcIlr45;
+  unsigned int intcIlr46;
+  unsigned int intcIlr47;
+  unsigned int intcIlr48;
+  unsigned int intcIlr49;
+  unsigned int intcIlr50;
+  unsigned int intcIlr51;
+  unsigned int intcIlr52;
+  unsigned int intcIlr53;
+  unsigned int intcIlr54;
+  unsigned int intcIlr55;
+  unsigned int intcIlr56;
+  unsigned int intcIlr57;
+  unsigned int intcIlr58;
+  unsigned int intcIlr59;
+  unsigned int intcIlr60;
+  unsigned int intcIlr61;
+  unsigned int intcIlr62;
+  unsigned int intcIlr63;
+  unsigned int intcIlr64;
+  unsigned int intcIlr65;
+  unsigned int intcIlr66;
+  unsigned int intcIlr67;
+  unsigned int intcIlr68;
+  unsigned int intcIlr69;
+  unsigned int intcIlr70;
+  unsigned int intcIlr71;
+  unsigned int intcIlr72;
+  unsigned int intcIlr73;
+  unsigned int intcIlr74;
+  unsigned int intcIlr75;
+  unsigned int intcIlr76;
+  unsigned int intcIlr77;
+  unsigned int intcIlr78;
+  unsigned int intcIlr79;
+  unsigned int intcIlr80;
+  unsigned int intcIlr81;
+  unsigned int intcIlr82;
+  unsigned int intcIlr83;
+  unsigned int intcIlr84;
+  unsigned int intcIlr85;
+  unsigned int intcIlr86;
+  unsigned int intcIlr87;
+  unsigned int intcIlr88;
+  unsigned int intcIlr89;
+  unsigned int intcIlr90;
+  unsigned int intcIlr91;
+  unsigned int intcIlr92;
+  unsigned int intcIlr93;
+  unsigned int intcIlr94;
+  unsigned int intcIlr95;
+};
+
 #define REG32 (volatile unsigned int*)
 
 
@@ -37,153 +191,22 @@ struct gpio{
 ## MISC
 ##############################################################################*/
 
-        /* Constants for data to put in IRQ/FIQ Exception Vectors */
-#define VECTDATA_IRQ  0xE51FFFF0 /* LDR PC,[PC,#-0xFF0 */
-#define VECTDATA_FIQ  /* __TODO */
-#define QUARTER_SIZE               0x40000000
 
-#define QUARTER0                   0x00000000
+#define GPIO5_BASE	0x49056000
+#define GPIO6_BASE	0x49058000
+#define GPT1		0x48318000
+#define MPU_INTC	0x48200000
 
-#define QUARTER1                   0x40000000
-#define Q1_ON_CHIP_MEMORY            0x40000000
-#define Q1_ON_CHIP_MEMORY_SIZE       0x08000000
-#define Q1_OCM_BOOT_ROM_SECURE         0x40000000
-#define Q1_OCM_BOOT_ROM_SECURE_SIZE    0x00014000
-#define Q1_OCM_BOOT_ROM_PUBLIC         0x40014000
-#define Q1_OCM_BOOT_ROM_PUBLIC_SIZE    0x00008000
-#define Q1_OCM_RESERVED1               0x4001c000
-#define Q1_OCM_RESERVED1_SIZE          0x001e4000
-#define Q1_OCM_SRAM_INTERNAL           0x40200000
-#define Q1_OCM_SRAM_INTERNAL_SIZE      0x00010000
-#define Q1_OCM_RESERVED2               0x40210000
-#define Q1_OCM_RESERVED2_SIZE          0x07df0000
-#define Q1_L4_INTERCONNECT           0x48000000
-#define Q1_L4_INTERCONNECT_SIZE      0x08000000
-#define Q1_L4_INT_CORE                 0x48000000
-#define Q1_L4_INT_CORE_SIZE            0x01000000
-#define SYS_CONTROL_MODULE               0x48002000
-#define SYS_CONTROL_MODULE_SIZE          0x00002000
-#define CLOCK_MANAGER                    0x48004000
-#define CLOCK_MANAGER_SIZE               0x00004000
-#define SDMA                             0x48056000
-#define SDMA_SIZE                        0x00002000
-#define UART1                            0x4806a000
-#define UART1_SIZE                       0x00002000
-#define UART2                            0x4806c000
-#define UART2_SIZE                       0x00002000
-#define INTERRUPT_CONTROLLER             0x48200000
-#define INTERRUPT_CONTROLLER_SIZE        0x00001000
-#define L4_CORE_WAKEUP_INT               0x48300000
-#define L4_CORE_WAKEUP_INT_SIZE          0x00040FFF
-#define PRM                                0x48306000
-#define PRM_SIZE                           0x00004000
-#define GPIO1                              0x48310000
-#define GPIO1_SIZE                         0x00002000
-#define WDTIMER2                           0x48314000
-#define WDTIMER2_SIZE                      0x00002000
-#define GPTIMER1                           0x48318000
-#define GPTIMER1_SIZE                      0x00002000
-#define TIMER_32K                          0x48320000
-#define TIMER_32K_SIZE                     0x00002000
-#define Q1_L4_INT_PER                  0x49000000
-#define Q1_L4_INT_PER_SIZE             0x00100000
-#define UART3                            0x49020000
-#define UART3_SIZE                       0x00002000
-#define GPTIMER2                         0x49032000
-#define GPTIMER2_SIZE                    0x00002000
-#define GPIO2_BASE                       0x49050000
-#define GPIO2_SIZE                       0x00002000
-#define GPIO3_BASE                       0x49052000
-#define GPIO3_SIZE                       0x00002000
-#define GPIO4_BASE                       0x49054000
-#define GPIO4_SIZE                       0x00002000
-#define GPIO5_BASE                       0x49056000
-#define GPIO5_SIZE                       0x00002000
-#define GPIO6_BASE                       0x49058000
-#define GPIO6_SIZE                       0x00002000
-#define Q1_L4_INT_PER_SIZE             0x00100000
-#define Q1_L4_INT_RESERVED             0x49100000
-#define Q1_L4_INT_RESERVED_SIZE        0x06F00000
-#define Q1_SLAVE_GRAPHICS            0x50000000
-#define Q1_SLAVE_GRAPHICS_SIZE       0x04000000
-#define Q1_L4_EMULATION              0x54000000
-#define Q1_L4_EMULATION_SIZE         0x04000000
-#define Q1_RESERVED1                 0x58000000
-#define Q1_RESERVED1_SIZE            0x04000000
-#define Q1_IVA22_IMMU                0x5c000000
-#define Q1_IVA22_IMMU_SIZE           0x04000000
-#define Q1_RESERVED2                 0x60000000
-#define Q1_RESERVED2_SIZE            0x08000000
-#define Q1_L3_INTERCONNECT           0x68000000
-#define Q1_L3_INTERCONNECT_SIZE      0x08000000
-#define Q1_L3_GPMC                     0x6E000000
-#define Q1_L3_GPMC_SIZE                0x01000000
-#define Q1_SDRC_SMS                  0x70000000
-#define Q1_SDRC_SMS_SIZE             0x10000000
-
-#define QUARTER2                   0x80000000
-#define Q2_SDRC_SMS                  0x80000000
-#define Q2_SDRC_SMS_SIZE             0x40000000
-
-#define QUARTER3                   0xC000000
-#define Q3_RESERVED                  0xC0000000
-#define Q3_RESERVED_SIZE             0x20000000
-#define Q3_SDRC_SMS                  0xE0000000
-#define Q3_SDRC_SMS_SIZE             0x20000000
-
-
-
-
-/**********************************************
- * 		GPIO Interface
- * Register definitions
- * *******************************************/
-
-#define GPIO_REVISION            0x000
-
-#define GPIO_SYSCONFIG           0x010
-#define GPIO_SYSCONFIG_RESERVED     0xFFFFFFE0
-#define GPIO_SYSCONFIG_IDLEMODE     0x00000018
-#define GPIO_SYSCONFIG_ENAWAKEUP    0x00000004
-#define GPIO_SYSCONFIG_SOFTRESET    0x00000002
-#define GPIO_SYSCONFIG_AUTOIDLE     0x00000001
-
-#define GPIO_SYSSTATUS           0x014
-#define GPIO_SYSSTATUS_RESERVED     0xFFFFFFFE
-#define GPIO_SYSSTATUS_RESETDONE    0x00000001
-
-#define GPIO_IRQSTATUS1          0x018
-#define GPIO_IRQENABLE1          0x01C
-#define GPIO_WAKEUPENABLE        0x020
-#define GPIO_IRQSTATUS2          0x028
-#define GPIO_IRQENABLE2          0x02C
-
-#define GPIO_CTRL                0x030
-#define GPIO_CTRL_RESERVED          0xFFFFFFF8
-#define GPIO_CTRL_GATERATIO         0x00000006
-#define GPIO_CTRL_DISABLEMOD        0x00000001
-
-#define GPIO_OE                  0x034
-#define GPIO_DATAIN              0x038
-#define GPIO_DATAOUT             0x03C
-#define GPIO_LEVELDETECT0        0x040
-#define GPIO_LEVELDETECT1        0x044
-#define GPIO_RISINGDETECT        0x048
-#define GPIO_FALLINGDETECT       0x04C
-#define GPIO_DEBOUNCENABLE       0x050
-#define GPIO_DEBOUNCINGTIME      0x054
-#define GPIO_CLEARIRQENABLE1     0x060
-#define GPIO_SETIRQENABLE1       0x064
-#define GPIO_CLEARIRQENABLE2     0x070
-#define GPIO_SETIRQENABLE2       0x074
-#define GPIO_CLEARWKUENA         0x080
-#define GPIO_SETWKUENA           0x084
-#define GPIO_CLEARDATAOUT        0x090
-#define GPIO_SETDATAOUT          0x094
-
-
-
-
+/* Default RAM Exception handlers
+ * Custom Handlers So I will use 
+ * secondary addresses */
+#define E_UNDEFINED	(*(REG32 (0x4020FFE4)))
+#define E_SWI		(*(REG32 (0x4020FFE8)))
+#define E_PREFETCH	(*(REG32 (0x4020FFEC)))
+#define E_DATA_ABRT	(*(REG32 (0x4020FFF0)))
+#define E_UNUSED	(*(REG32 (0x4020FFF4)))
+#define E_IRQ		(*(REG32 (0x4020FFF8)))
+#define E_FIQ		(*(REG32 (0x4020FFFC)))
 
 
 

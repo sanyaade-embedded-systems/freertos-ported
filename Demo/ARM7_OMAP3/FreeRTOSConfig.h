@@ -70,10 +70,10 @@
  *----------------------------------------------------------*/
 
 #define configUSE_PREEMPTION		1
-#define configUSE_IDLE_HOOK			0
-#define configUSE_TICK_HOOK			0
-#define configCPU_CLOCK_HZ			( ( unsigned long ) 58982400 )	/* =14.7456MHz xtal multiplied by 4 using the PLL. */
-#define configTICK_RATE_HZ			( ( portTickType ) 1000 )
+#define configUSE_IDLE_HOOK		0
+#define configUSE_TICK_HOOK		0
+#define configCPU_CLOCK_HZ		( ( unsigned long ) 720000000 )	/* =720MHz */
+#define configTICK_RATE_HZ		( ( portTickType ) 100 ) /* 100Hz=1/10s=10ms */
 #define configMAX_PRIORITIES		( ( unsigned portBASE_TYPE ) 5 )
 #define configMINIMAL_STACK_SIZE	( ( unsigned short ) 128 )
 #define configTOTAL_HEAP_SIZE		( ( size_t ) ( 24 * 1024 ) )
@@ -90,13 +90,13 @@
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
 
-#define INCLUDE_vTaskPrioritySet		1
-#define INCLUDE_uxTaskPriorityGet		1
-#define INCLUDE_vTaskDelete				1
+#define INCLUDE_vTaskPrioritySet	1
+#define INCLUDE_uxTaskPriorityGet	1
+#define INCLUDE_vTaskDelete		1
 #define INCLUDE_vTaskCleanUpResources	0
-#define INCLUDE_vTaskSuspend			1
-#define INCLUDE_vTaskDelayUntil			1
-#define INCLUDE_vTaskDelay				1
+#define INCLUDE_vTaskSuspend		1
+#define INCLUDE_vTaskDelayUntil		1
+#define INCLUDE_vTaskDelay		1
 
 
 #endif /* FREERTOS_CONFIG_H */

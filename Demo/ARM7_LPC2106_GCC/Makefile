@@ -51,11 +51,17 @@
 #    licensing and training services.
 #*/
 
+USE_THUMB_MODE=NO
+DEBUG=-g
+OPTIM=-O0
+RUN_MODE=RUN_FROM_RAM
 CC=arm-elf-gcc
 OBJCOPY=arm-elf-objcopy
 ARCH=arm-elf-ar
 CRT0=boot.s
-WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wsign-compare \
+LDSCRIPT=lpc2106-ram.ld
+
+WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wsign-compare -Werror \
 		-Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wunused
 
 #
@@ -63,7 +69,7 @@ WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align
 #
 CFLAGS=$(WARNINGS) -D $(RUN_MODE) -D GCC_ARM7 -I. -I../../Source/include \
 		-I../Common/include $(DEBUG) -mcpu=arm7tdmi -T$(LDSCRIPT) \
-		 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing -fno-dwarf2-cfi-asm
+		 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
 
 ifeq ($(USE_THUMB_MODE),YES)
 	CFLAGS += -mthumb-interwork -D THUMB_INTERWORK

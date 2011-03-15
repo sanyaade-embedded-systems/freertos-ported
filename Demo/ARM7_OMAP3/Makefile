@@ -68,13 +68,9 @@ WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align
 # CFLAGS common to both the THUMB and ARM mode builds
 #
 CFLAGS=$(WARNINGS) -D $(RUN_MODE) -D GCC_ARM7 -I. -I../../Source/include \
-		-I../Common/include $(DEBUG) -mcpu=arm7tdmi -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
-		 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
+		-I../Common/include -I../$(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3 $(DEBUG) -mcpu=arm7tdmi -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
+	 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
 
-#CFLAGS=$(WARNINGS) -D $(RUN_MODE) -D GCC_ARM7 -I. -I../../Source/include \
-#		-I../Common/include $(DEBUG) -mcpu=arm7tdmi -Ttext $(TARGET_BASE_ADDRESS) \
-#		 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
-#
 ifeq ($(USE_THUMB_MODE),YES)
 	CFLAGS += -mthumb-interwork -D THUMB_INTERWORK
 	THUMB_FLAGS=-mthumb
@@ -91,6 +87,13 @@ DEMO_SOURCE_DIR=../Common/Minimal
 THUMB_SRC = \
 main.c \
 ParTest/ParTest.c \
+$(DEMO_SOURCE_DIR)/integer.c \
+$(DEMO_SOURCE_DIR)/flash.c \
+$(DEMO_SOURCE_DIR)/PollQ.c \
+$(DEMO_SOURCE_DIR)/flop.c \
+$(DEMO_SOURCE_DIR)/semtest.c \
+$(DEMO_SOURCE_DIR)/dynamic.c \
+$(DEMO_SOURCE_DIR)/BlockQ.c \
 $(RTOS_SOURCE_DIR)/tasks.c \
 $(RTOS_SOURCE_DIR)/queue.c \
 $(RTOS_SOURCE_DIR)/list.c \
@@ -125,8 +128,7 @@ $(ARM_OBJ) : %.o : %.c $(LDSCRIPT) Makefile
 
 clean :
 	rm -rf $(ARM_OBJ) $(THUMB_OBJ)
-	rm -rf rmosdemo.elf rtosdemo.hex rtosdemo.map
-	rm -rf 
+	rm -rf rtosdemo.elf rtosdemo.hex rtosdemo.map
 	touch Makefile
 
 

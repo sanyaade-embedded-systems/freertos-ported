@@ -90,6 +90,10 @@
 /* Setup the timer to generate the tick interrupts. */
 static void prvSetupTimerInterrupt( void );
 
+/* U-boot code uses Timer 1 */
+
+
+/*--------------------------------------------------*/
 /* 
  * The scheduler can only be started from ARM mode, so 
  * vPortISRStartFirstSTask() is defined in portISR.c. 
@@ -201,13 +205,37 @@ void vPortEndScheduler( void )
  */
 static void prvSetupTimerInterrupt( void )
 {
-unsigned long ulCompareMatch;
-extern void ( vTickISR )( void );
+	unsigned long ulCompareMatch;
+	extern void ( vTickISR )( void );
+	struct gptimer *gptimer1 = (struct gptimer *)GPT1;
+	struct InterruptController *intc = (struct InterruptController *)MPU_INTC;
+	extern void ( vTckISR )( void );
+
+	/* Setup interrupt handler */
+	E_IRQ = ( long ) vTickISR;
+
+
+	/* Calculate the match value required for our wanted tick rate */
+	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
 	
-	/* The interrupt timer is already configured by uboot
-	 * therefore I can't do much here */
+	/* Protect against divide by zero */
+	#if portPRESCALE_VALUE != 0
+		ulCompareMatch /= ( portPRESCALE_VALUE +1 );
+	#endif
+	/* The timer must be in compare mode, and should be the value
+	 * holded in ulCompareMatch
+	 * bit 0=1 -> enable timer
+	 * bit 1=1 -> autoreload
+	 * bit 6=1 -> compare mode
+	 * */
+	gptimer1->tmar = ulCompareMatch; // load match value
+	gptimer1->tier = 0x0; //enable match interrupt
+	gptimer1->tclr = 0x00000023;
+	
+}
+
 
 /*-----------------------------------------------------------*/
-}
+
 
 

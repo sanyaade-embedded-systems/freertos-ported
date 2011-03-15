@@ -60,9 +60,9 @@
 
 #include "FreeRTOS.h"
 #include "partest.h"
+#include <stdlib.h>
 
-#define partstFIRST_IO			( ( unsigned long ) 0x400 )
-#define partstNUM_LEDS			( 4 )
+#define partstNUM_LEDS			( 2 )
 #define partstALL_OUTPUTS_OFF	( ( unsigned long ) 0xffffffff )
 
 /*-----------------------------------------------------------
@@ -78,5 +78,54 @@ void vParTestInitialise( void )
 	 * GPIO6: 23,10,08,02,01 */
 	gpio5_base->oe=~(PIN31|PIN30|PIN29|PIN28|PIN22|PIN21|PIN15|PIN14|PIN13|PIN12);
 	gpio6_base->oe=~(PIN23|PIN10|PIN8|PIN2|PIN1);
+
+	/* Free Memory */
+	//free(gpio5_base);
+	//free(gpio6_base);
 }
 
+void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
+{
+	struct gpio *gpio5_base = (struct gpio *)GPIO5_BASE;
+	unsigned long GPIO_PIN = 0;
+	if( uxLED < partstNUM_LEDS){
+		/* I define LED0 (GPIO_149) as 0
+		 * and 	LED1 (GPIO_150) as 1 */
+		switch(uxLED){
+			case 0: GPIO_PIN=PIN21;break;
+			case 1: GPIO_PIN=PIN22;break;
+			default: break;
+		};
+		if ( xValue )
+			gpio5_base->setdataout=GPIO_PIN;
+		else
+			gpio5_base->cleardataout=GPIO_PIN;
+	}
+	//free(gpio5_base);
+}
+
+void vParTestToggleLED( unsigned portBASE_TYPE uxLED )
+{
+	unsigned long ulCurrentState, mask=0, GPIO_PIN=0;
+	struct gpio *gpio5_base = (struct gpio *)GPIO5_BASE;
+	if( uxLED < partstNUM_LEDS )
+	{
+		/* Toggle LED Status
+		 * LED0 = GPIO_149
+		 * LED1 = GPIO_150 */
+		switch(uxLED){
+			case 0: GPIO_PIN=PIN21;break;
+			case 1: GPIO_PIN=PIN22;break;
+			default: break;
+		};
+
+		ulCurrentState = gpio5_base->datain;
+		/* I have to ignore the rest of the bits */
+		
+		if ( ulCurrentState & uxLED )
+			gpio5_base->cleardataout = GPIO_PIN;
+		else
+			gpio5_base->setdataout = GPIO_PIN;
+	}
+	//free(gpio5_base);
+}
