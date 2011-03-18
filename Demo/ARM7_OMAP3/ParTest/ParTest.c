@@ -65,28 +65,22 @@
 #define partstNUM_LEDS			( 2 )
 #define partstALL_OUTPUTS_OFF	( ( unsigned long ) 0xffffffff )
 
+extern inline unsigned int RegRead(unsigned int base, unsigned int regOffs);
+extern inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value);
+
 /*-----------------------------------------------------------
  * Simple parallel port IO routines.
  *-----------------------------------------------------------*/
 
 void vParTestInitialise( void )
 {
-	struct gpio *gpio5_base = (struct gpio *)GPIO5_BASE;
-	struct gpio *gpio6_base = (struct gpio *)GPIO6_BASE;
-
 	/* GPIO5: 31,30,29,28,22,21,15,14,13,12
 	 * GPIO6: 23,10,08,02,01 */
-	gpio5_base->oe=~(PIN31|PIN30|PIN29|PIN28|PIN22|PIN21|PIN15|PIN14|PIN13|PIN12);
-	gpio6_base->oe=~(PIN23|PIN10|PIN8|PIN2|PIN1);
-
-	/* Free Memory */
-	//free(gpio5_base);
-	//free(gpio6_base);
+	RegWrite(GPIO5_BASE,GPIO_OE,~(PIN31|PIN30|PIN29|PIN28|PIN22|PIN21|PIN15|PIN14|PIN13|PIN12));
+	RegWrite(GPIO6_BASE,GPIO_OE,~(PIN23|PIN10|PIN8|PIN2|PIN1));
 }
-
 void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 {
-	struct gpio *gpio5_base = (struct gpio *)GPIO5_BASE;
 	unsigned long GPIO_PIN = 0;
 	if( uxLED < partstNUM_LEDS){
 		/* I define LED0 (GPIO_149) as 0
@@ -97,17 +91,15 @@ void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 			default: break;
 		};
 		if ( xValue )
-			gpio5_base->setdataout=GPIO_PIN;
+			RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,GPIO_PIN);
 		else
-			gpio5_base->cleardataout=GPIO_PIN;
+			RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,GPIO_PIN);
 	}
-	//free(gpio5_base);
 }
 
 void vParTestToggleLED( unsigned portBASE_TYPE uxLED )
 {
 	unsigned long ulCurrentState, mask=0, GPIO_PIN=0;
-	struct gpio *gpio5_base = (struct gpio *)GPIO5_BASE;
 	if( uxLED < partstNUM_LEDS )
 	{
 		/* Toggle LED Status
@@ -119,13 +111,12 @@ void vParTestToggleLED( unsigned portBASE_TYPE uxLED )
 			default: break;
 		};
 
-		ulCurrentState = gpio5_base->datain;
+		ulCurrentState = RegRead(GPIO5_BASE,GPIO_DATAIN);
 		/* I have to ignore the rest of the bits */
 		
 		if ( ulCurrentState & uxLED )
-			gpio5_base->cleardataout = GPIO_PIN;
+			RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,GPIO_PIN);
 		else
-			gpio5_base->setdataout = GPIO_PIN;
+			RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,GPIO_PIN);
 	}
-	//free(gpio5_base);
 }

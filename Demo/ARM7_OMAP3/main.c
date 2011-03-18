@@ -144,6 +144,15 @@ error. */
 /*-----------------------------------------------------------*/
 
 /*
+ * Helper instructions
+ */
+
+inline unsigned int RegRead(unsigned int base, unsigned int regOffs);
+inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value);
+inline unsigned int AddrRead(unsigned int base, unsigned int regOffs);
+void dumpinterrupts ( void );
+
+/*
  * The Beagleboard has 2 LEDS available on the GPIO module
  * I will use LED0 to express errors on tasks
  */
@@ -159,7 +168,7 @@ static void prvSetupHardware( void );
 /* Demo application blinking the LEDS
  */
 static void setleds ( void );
-
+static void setinterrupts ( void );
 /*
  * Checks that all the demo application tasks are still executing without error
  * - as described at the top of the file.
@@ -189,9 +198,13 @@ static void vMemCheckTask( void *pvParameters );
 int main( void )
 {
 	/* Setup the hardware for use with the Beableboard. */
+	serial_newline();
+	serial_putstring("Initializing the hardware...");
 	prvSetupHardware();
-	
+	serial_putstring("OK");
+	serial_newline();
 	/* Start the demo/test application tasks. */
+	/*serial_putstring("Starting demo tasks...");
 	vStartIntegerMathTasks ( tskIDLE_PRIORITY );
 	vStartLEDFlashTasks ( mainLED_TASK_PRIORITY );
 	vStartPolledQueueTasks ( mainQUEUE_POLL_PRIORITY );
@@ -199,10 +212,14 @@ int main( void )
 	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartDynamicPriorityTasks();
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
-
+	serial_putstring("OK");
+	serial_newline();
+	*/
 	/* start the check task - which is defined in this file!. */
+	/*serial_putstring("Starting ErrorChecks task...");
 	xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
-
+	serial_putstring("OK");
+	serial_newline();*/
 	/* Now all the tasks have been stared - start the scheduler.
 	 * NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
 	 * Te processor MUST be in supervisor mode when vTaskStartScheduler is called.
@@ -210,9 +227,13 @@ int main( void )
 	 * mode prior to main being called. If you are not using one of these demo application
 	 * projects then ensure Supervisor mode is used here */
 	/* Should never reach here! */
-
-	vTaskStartScheduler();
-	//setleds();
+	
+//	serial_putstring("Starting the scheduler...");
+//	vTaskStartScheduler();
+//	serial_putstring("OK");
+//	serial_newline();
+	setinterrupts();
+	setleds();
 	return 0;
 }
 /*-----------------------------------------------------------*/
@@ -424,21 +445,136 @@ static void setleds ( void )
 {
 	unsigned int counter=0;
 	int times=0;
-	struct gpio *gpio5_base=(struct gpio *)GPIO5_BASE;
-	gpio5_base->setdataout = PIN22|PIN21;
-	while(times<10){
+	int *pointer=0x48200040;
+	RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN22|PIN21);
+	while(times<1000){
 		for(counter=0;counter<0x2FFFF;counter++){}//delay
 		counter=0;
-		gpio5_base->setdataout = PIN21;
+		//serial_putstring("Current IRQ: ");
+		//serial_putstring(*pointer);
+		//serial_newline();
+		RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN21);
 		for(counter=0;counter<0x2FFFF;counter++){}
 		counter=0;
-		gpio5_base->cleardataout = PIN22|PIN21;
+		RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
 		for(counter=0;counter<0x2FFFF;counter++){}
 		counter=0;
-		gpio5_base->setdataout = PIN22;
+		RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN22);
 		for(counter=0;counter<0x2FFFF;counter++){}//delay
 		counter=0;
-		gpio5_base->cleardataout = PIN22|PIN21;
+		RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
 		times++;
 	}
+}
+
+static void setinterrupts( void ){
+	serial_newline();
+	serial_putstring("Setting up the timer interrupt...");
+	
+	unsigned long ulCompareMatch;
+	extern void ( vTickISR )( void );
+	//struct gptimer *gptimer1 = (struct gptimer *)GPT1;
+	//struct InterruptController *intc = (struct InterruptController *)MPU_INTC;
+	extern void ( vTckISR )( void );
+
+	/* Setup interrupt handler */
+	E_IRQ = ( long ) vTickISR;
+	
+	/* Enable IRQ 37 - bit 5 */
+	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000003);
+	RegWrite(MPU_INTC,INTCPS_IDLE,0x00000001);
+	RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
+	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x00000020));
+	RegWrite(MPU_INTC,INTCPS_ILSR37,0x0);
+	dumpinterrupts();
+	serial_putstring("OK");
+	
+	serial_newline();
+	serial_putstring("Setting up the timer values...");
+	
+	/* Calculate the match value required for our wanted tick rate */
+	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
+	
+	/* Protect against divide by zero */
+	#if portPRESCALE_VALUE != 0
+		ulCompareMatch /= ( portPRESCALE_VALUE +1 );
+	#endif
+	/* The timer must be in compare mode, and should be the value
+	 * holded in ulCompareMatch
+	 * bit 0=1 -> enable timer
+	 * bit 1=1 -> autoreload
+	 * bit 6=1 -> compare mode
+	 * The source is 32Khz
+	 * */
+	RegWrite(GPIO5_BASE,GPTI1_TLDR,0);
+	RegWrite(GPIO5_BASE,GPTI1_TCRR,0);
+	RegWrite(GPIO5_BASE,GPTI1_TMAR,0x31111111); // load match value
+	RegWrite(GPIO5_BASE,GPTI1_TIER,0x1); //enable match interrupt
+	
+	serial_putstring("OK");
+	__asm volatile (
+		"STMDB	SP!, {R0}		\n\t"
+		"MRS	R0, CPSR		\n\t"
+		"BIC	R0, R0, #0xC0		\n\t"
+		"MSR	CPSR, R0		\n\t"
+		"LDMIA	SP!, {R0}		\n\t"
+	);
+
+	//gptimer1->tclr = 0x00000043;	// start timer
+	RegWrite(GPIO5_BASE,GPTI1_TCLR,0x00000043);
+}
+
+void dumpinterrupts( void ){
+	serial_newline();
+	serial_putstring("***Interrupt Dump (Memory)***");
+	serial_newline();
+	serial_newline();
+	serial_putstring("SysConfig:0x ");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_SYSCONFIG));
+	serial_newline();
+	serial_putstring("SysStatus:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_SYSSTATUS));
+	serial_newline();
+	serial_putstring("SirIRQ:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_SIR_IRQ));
+	serial_newline();
+	serial_putstring("SirFIQ:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_SIR_FIQ));
+	serial_newline();
+	serial_putstring("Control:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_CONTROL));
+	serial_newline();
+	serial_putstring("Protection:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_PROTECTION));
+	serial_newline();
+	serial_putstring("Idle:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_IDLE));
+	serial_newline();
+	serial_putstring("IrqPriority:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_IRQ_PRIORITY));
+	serial_newline();
+	serial_putstring("FiqPriority:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_FIQ_PRIORITY));
+	serial_newline();
+	serial_putstring("Threshold:0x");
+	serial_putint(AddrRead(MPU_INTC,INTCPS_THRESHOLD));
+	serial_newline();
+
+}
+
+
+inline unsigned int RegRead(unsigned int base, unsigned int regOffs)
+{
+ 	volatile unsigned int * regPtr = (unsigned int *)(base | regOffs);
+	return *regPtr;
+}
+
+inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value)
+{
+	volatile unsigned int * regPtr = (unsigned int*)(base | regOffs);
+	*regPtr = value;
+}
+
+inline unsigned int AddrRead(unsigned int base, unsigned int regOffs){
+	return (base|regOffs);
 }

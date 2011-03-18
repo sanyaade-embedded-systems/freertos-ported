@@ -55,7 +55,7 @@ DEBUG=-g
 OPTIM=-O0
 RUN_MODE=RUN_FROM_RAM
 LDSCRIPT=omap3-ram.ld
-TEXT_BASE = 0x80e80000
+TEXT_BASE = 0x80e00000
 
 CC=arm-elf-gcc
 OBJCOPY=arm-elf-objcopy
@@ -87,6 +87,7 @@ DEMO_SOURCE_DIR=../Common/Minimal
 THUMB_SRC = \
 main.c \
 ParTest/ParTest.c \
+serial/myserial.c \
 $(DEMO_SOURCE_DIR)/integer.c \
 $(DEMO_SOURCE_DIR)/flash.c \
 $(DEMO_SOURCE_DIR)/PollQ.c \
@@ -114,6 +115,9 @@ $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c
 ARM_OBJ = $(ARM_SRC:.c=.o)
 THUMB_OBJ = $(THUMB_SRC:.c=.o)
 
+rtosdemo.bin : rtosdemo.elf
+	$(OBJCOPY) rtosdemo.elf -O binary rtosdemo.bin
+
 rtosdemo.hex : rtosdemo.elf
 	$(OBJCOPY) rtosdemo.elf -O ihex rtosdemo.hex
 
@@ -128,7 +132,7 @@ $(ARM_OBJ) : %.o : %.c $(LDSCRIPT) Makefile
 
 clean :
 	rm -rf $(ARM_OBJ) $(THUMB_OBJ)
-	rm -rf rtosdemo.elf rtosdemo.hex rtosdemo.map
+	rm -rf rtosdemo.elf rtosdemo.hex rtosdemo.map rtosdemo.bin
 	touch Makefile
 
 

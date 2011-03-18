@@ -67,6 +67,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "omap3.h"
 
 /* Constants required to setup the task context. */
 #define portINITIAL_SPSR				( ( portSTACK_TYPE ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
@@ -205,6 +206,9 @@ void vPortEndScheduler( void )
  */
 static void prvSetupTimerInterrupt( void )
 {
+	serial_newline();
+	serial_putstring("Setting up the timer interrupt...");
+	
 	unsigned long ulCompareMatch;
 	extern void ( vTickISR )( void );
 	struct gptimer *gptimer1 = (struct gptimer *)GPT1;
@@ -213,8 +217,15 @@ static void prvSetupTimerInterrupt( void )
 
 	/* Setup interrupt handler */
 	E_IRQ = ( long ) vTickISR;
-
-
+	intc->intcSysConfig = 0x00000000;
+	intc->intcIdle = 0x00000001;//FUNCIDLE (1062)
+	/* Enable IRQ 37 - bit 5 */
+	intc->intcMir1 = 0x00000020;
+	
+	serial_putstring("OK");
+	serial_newline();
+	serial_putstring("Setting up the timer values...");
+	
 	/* Calculate the match value required for our wanted tick rate */
 	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
 	
@@ -228,9 +239,11 @@ static void prvSetupTimerInterrupt( void )
 	 * bit 1=1 -> autoreload
 	 * bit 6=1 -> compare mode
 	 * */
-	gptimer1->tmar = ulCompareMatch; // load match value
-	gptimer1->tier = 0x0; //enable match interrupt
-	gptimer1->tclr = 0x00000023;
+	gptimer1->tmar = ulCompareMatch;// load match value
+	gptimer1->tier = 0x0; 		// enable match interrupt
+	gptimer1->tclr = 0x00000023;	// start timer
+	
+	serial_putstring("OK");
 	
 }
 
