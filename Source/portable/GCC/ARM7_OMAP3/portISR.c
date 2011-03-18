@@ -140,8 +140,9 @@ void vPortYieldProcessor( void )
 void vTickISR( void ) __attribute__((naked));
 void vTickISR( void )
 {
-	
-	serial_putstring("ISR Routing");
+	serial_newline();
+	serial_putstring("This is interrupt: ");
+	serial_putint(RegRead(MPU_INTC,INTCPS_ISR_SET1));
 	/* Save the context of the interrupted task. */
 	portSAVE_CONTEXT();	
 
@@ -165,6 +166,7 @@ void vTickISR( void )
 	
 	/* Clear the interrupts
 	 * Page: 1060 */
+	RegWrite(MPU_INTC,INTCPS_ISR_CLEAR1,0x00000020);
 	RegWrite(MPU_INTC,INTCPS_CONTROL,0x1);
 	/* Restore the context of the new task. */
 	portRESTORE_CONTEXT();

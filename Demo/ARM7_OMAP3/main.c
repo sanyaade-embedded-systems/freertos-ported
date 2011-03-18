@@ -536,37 +536,47 @@ void dumpinterrupts( void ){
 	serial_newline();
 	serial_newline();
 	serial_putstring("SysConfig:0x ");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_SYSCONFIG));
+	serial_putint(RegRead(MPU_INTC,INTCPS_SYSCONFIG));
 	serial_newline();
 	serial_putstring("SysStatus:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_SYSSTATUS));
+	serial_putint(RegRead(MPU_INTC,INTCPS_SYSSTATUS));
 	serial_newline();
 	serial_putstring("SirIRQ:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_SIR_IRQ));
+	serial_putint(RegRead(MPU_INTC,INTCPS_SIR_IRQ));
 	serial_newline();
 	serial_putstring("SirFIQ:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_SIR_FIQ));
+	serial_putint(RegRead(MPU_INTC,INTCPS_SIR_FIQ));
 	serial_newline();
 	serial_putstring("Control:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_CONTROL));
+	serial_putint(RegRead(MPU_INTC,INTCPS_CONTROL));
 	serial_newline();
 	serial_putstring("Protection:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_PROTECTION));
+	serial_putint(RegRead(MPU_INTC,INTCPS_PROTECTION));
 	serial_newline();
 	serial_putstring("Idle:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_IDLE));
+	serial_putint(RegRead(MPU_INTC,INTCPS_IDLE));
 	serial_newline();
 	serial_putstring("IrqPriority:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_IRQ_PRIORITY));
+	serial_putint(RegRead(MPU_INTC,INTCPS_IRQ_PRIORITY));
 	serial_newline();
 	serial_putstring("FiqPriority:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_FIQ_PRIORITY));
+	serial_putint(RegRead(MPU_INTC,INTCPS_FIQ_PRIORITY));
 	serial_newline();
 	serial_putstring("Threshold:0x");
-	serial_putint(AddrRead(MPU_INTC,INTCPS_THRESHOLD));
+	serial_putint(RegRead(MPU_INTC,INTCPS_THRESHOLD));
+	serial_newline();
+	serial_putstring("ITR1:0x");
+	serial_putint(RegRead(MPU_INTC,INTCPS_ITR1));
+	serial_newline();
+	serial_putstring("MIR1:0x");
+	serial_putint(RegRead(MPU_INTC,INTCPS_MIR1));
+	serial_newline();
+	serial_putstring("ILR37:0x");
+	serial_putint(RegRead(MPU_INTC,INTCPS_ILSR37));
 	serial_newline();
 
 }
+
 
 
 inline unsigned int RegRead(unsigned int base, unsigned int regOffs)

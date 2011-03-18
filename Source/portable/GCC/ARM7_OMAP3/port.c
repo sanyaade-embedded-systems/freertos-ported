@@ -217,12 +217,14 @@ static void prvSetupTimerInterrupt( void )
 	E_IRQ = ( long ) vTickISR;
 	
 	/* Enable IRQ 37 - bit 5 */
-	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000003);
+	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000002);
+	while(RegRead(MPU_INTC,INTCPS_SYSSTATUS)==0)
+		serial_putchar(".");
 	RegWrite(MPU_INTC,INTCPS_IDLE,0x00000001);
-	RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
-	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x00000020));
-	RegWrite(MPU_INTC,INTCPS_ILSR37,0x0);
-	//dumpinterrupts();
+	//RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
+	RegWrite(MPU_INTC,INTCPS_MIR1,0x000000FF);
+	RegWrite(MPU_INTC,INTCPS_ILSR37,0x34);
+	dumpinterrupts();
 	serial_putstring("OK");
 	
 	serial_newline();
@@ -242,12 +244,17 @@ static void prvSetupTimerInterrupt( void )
 	 * bit 6=1 -> compare mode
 	 * The source is 32Khz
 	 * */
-	RegWrite(GPTI1,GPTI_TLDR,0);
-	RegWrite(GPTI1,GPTI_TCRR,0);
-	RegWrite(GPTI1,GPTI_TMAR,ulCompareMatch); // load match value
+	RegWrite(GPTI1,GPTI_TLDR,0); // initial value <- for reload
+	RegWrite(GPTI1,GPTI_TCRR,0); // internal counter value
+	RegWrite(GPTI1,GPTI_TMAR,0x11111111); // load match value
+	RegWrite(GPTI1,GPTI_TISR,0);
 	RegWrite(GPTI1,GPTI_TIER,0x1); //enable match interrupt
 
-
+	/*
+	 * bit 0 -> start
+	 * bit 1 -> autoreload
+	 * bit 6 -> compare enabled
+	 */
 	RegWrite(GPTI1,GPTI_TCLR,0x00000043);
 	serial_putstring("OK");
 	
