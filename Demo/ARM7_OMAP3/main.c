@@ -200,11 +200,15 @@ int main( void )
 	/* Setup the hardware for use with the Beableboard. */
 	serial_newline();
 	serial_putstring("Initializing the hardware...");
+	
 	prvSetupHardware();
+	
 	serial_putstring("OK");
 	serial_newline();
+	
 	/* Start the demo/test application tasks. */
-	/*serial_putstring("Starting demo tasks...");
+	serial_putstring("Starting demo tasks...");
+	
 	vStartIntegerMathTasks ( tskIDLE_PRIORITY );
 	vStartLEDFlashTasks ( mainLED_TASK_PRIORITY );
 	vStartPolledQueueTasks ( mainQUEUE_POLL_PRIORITY );
@@ -212,14 +216,17 @@ int main( void )
 	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartDynamicPriorityTasks();
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
+	
 	serial_putstring("OK");
 	serial_newline();
-	*/
+	
 	/* start the check task - which is defined in this file!. */
-	/*serial_putstring("Starting ErrorChecks task...");
+	serial_putstring("Starting ErrorChecks task...");
+	
 	xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	
 	serial_putstring("OK");
-	serial_newline();*/
+	serial_newline();
 	/* Now all the tasks have been stared - start the scheduler.
 	 * NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
 	 * Te processor MUST be in supervisor mode when vTaskStartScheduler is called.
@@ -228,12 +235,12 @@ int main( void )
 	 * projects then ensure Supervisor mode is used here */
 	/* Should never reach here! */
 	
-//	serial_putstring("Starting the scheduler...");
-//	vTaskStartScheduler();
-//	serial_putstring("OK");
+	serial_putstring("Starting the scheduler...");
+	vTaskStartScheduler();
+	serial_putstring("OK");
 //	serial_newline();
-	setinterrupts();
-	setleds();
+//	setinterrupts();
+//	setleds();
 	return 0;
 }
 /*-----------------------------------------------------------*/
@@ -445,7 +452,6 @@ static void setleds ( void )
 {
 	unsigned int counter=0;
 	int times=0;
-	int *pointer=0x48200040;
 	RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN22|PIN21);
 	while(times<1000){
 		for(counter=0;counter<0x2FFFF;counter++){}//delay
@@ -506,10 +512,10 @@ static void setinterrupts( void ){
 	 * bit 6=1 -> compare mode
 	 * The source is 32Khz
 	 * */
-	RegWrite(GPIO5_BASE,GPTI1_TLDR,0);
-	RegWrite(GPIO5_BASE,GPTI1_TCRR,0);
-	RegWrite(GPIO5_BASE,GPTI1_TMAR,0x31111111); // load match value
-	RegWrite(GPIO5_BASE,GPTI1_TIER,0x1); //enable match interrupt
+	RegWrite(GPTI1,GPTI_TLDR,0);
+	RegWrite(GPTI1,GPTI_TCRR,0);
+	RegWrite(GPTI1,GPTI_TMAR,0x31111111); // load match value
+	RegWrite(GPTI1,GPTI_TIER,0x1); //enable match interrupt
 	
 	serial_putstring("OK");
 	__asm volatile (
@@ -521,7 +527,7 @@ static void setinterrupts( void ){
 	);
 
 	//gptimer1->tclr = 0x00000043;	// start timer
-	RegWrite(GPIO5_BASE,GPTI1_TCLR,0x00000043);
+	RegWrite(GPTI1,GPTI_TCLR,0x00000043);
 }
 
 void dumpinterrupts( void ){

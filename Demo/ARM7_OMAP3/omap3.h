@@ -198,9 +198,6 @@ struct InterruptController
 ##############################################################################*/
 
 
-#define GPIO5_BASE	0x49056000
-#define GPIO6_BASE	0x49058000
-#define GPT1		0x48318000
 #define MPU_INTC	0x48200000
 
 /* Serial Configuration */
@@ -237,30 +234,33 @@ int printableChar(char c);
 #define E_FIQ		(*(REG32 (0x4020FFFC)))
 
 
-/* GPTIMER1 REGISTERS */
-#define GPTI1_TIDR	(*(REG32 (0x48318000)))
-#define GPTI1_TIOCP_CFG (*(REG32 (0x48318010)))
-#define GPTI1_TISTAT	(*(REG32 (0x48318014)))
-#define GPTI1_TISR	(*(REG32 (0x48318018)))
-#define GPTI1_TIER	(*(REG32 (0x4831801C)))
-#define GPTI1_TWER	(*(REG32 (0x48318020)))
-#define GPTI1_TCLR	(*(REG32 (0x48318024)))
-#define GPTI1_TCRR	(*(REG32 (0x48318028)))
-#define GPTI1_TLDR	(*(REG32 (0x4831802C)))
-#define GPTI1_TTGR	(*(REG32 (0x48318030)))
-#define GPTI1_TWPS	(*(REG32 (0x48318034)))
-#define GPTI1_TMAR	(*(REG32 (0x48318038)))
-#define GPTI1_TCAR1	(*(REG32 (0x4831803C)))
-#define GPTI1_TSICR	(*(REG32 (0x48318040)))
-#define GPTI1_TCAR2	(*(REG32 (0x48318044)))
-#define GPTI1_TPIR	(*(REG32 (0x48318048)))
-#define GPTI1_TNIR	(*(REG32 (0x4831804C)))
-#define GPTI1_TCVR	(*(REG32 (0x48318050)))
-#define GPTI1_TOCR	(*(REG32 (0x48318054)))
-#define GPTI1_TOWR	(*(REG32 (0x48318058)))
+/* GPTIMER REGISTERS */
+#define GPTI1		0x48318000
+
+#define GPTI_TIDR		0x0
+#define GPTI_TIOCP_CFG 	0x10
+#define GPTI_TISTAT		0x14
+#define GPTI_TISR		0x18
+#define GPTI_TIER		0x1C
+#define GPTI_TWER		0x20
+#define GPTI_TCLR		0x24
+#define GPTI_TCRR		0x28
+#define GPTI_TLDR		0x2C
+#define GPTI_TTGR		0x30
+#define GPTI_TWPS		0x34
+#define GPTI_TMAR		0x38
+#define GPTI_TCAR1		0x3C
+#define GPTI_TSICR		0x40
+#define GPTI_TCAR2		0x44
+#define GPTI_TPIR		0x48
+#define GPTI_TNIR		0x4C
+#define GPTI_TCVR		0x50
+#define GPTI_TOCR		0x54
+#define GPTI_TOWR		0x58
 
 /* Define MPU_INTC */
-#define MPU_INTC_BASE		(*(REG32 (0x48200000)))
+#define MPU_INTC	0x48200000
+
 #define INTCPS_REVISION		0x0
 #define INTCPS_SYSCONFIG 	0x10
 #define INTCPS_SYSSTATUS 	0x14
@@ -394,6 +394,9 @@ int printableChar(char c);
 #define INTCPS_ILSR95		0x27C
 
 /* GPIO */
+
+#define GPIO5_BASE	0x49056000
+#define GPIO6_BASE	0x49058000
 
 #define GPIO_REVISION		0x0
 #define GPIO_SYSCONFIG		0x10

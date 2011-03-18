@@ -81,10 +81,10 @@
 #define portINTERRUPT_ON_MATCH		( ( unsigned long ) 0x01 )
 #define portRESET_COUNT_ON_MATCH	( ( unsigned long ) 0x02 )
 
-/* Constants required to setup the VIC for the tick ISR. */
-#define portTIMER_VIC_CHANNEL		( ( unsigned long ) 0x0004 )
-#define portTIMER_VIC_CHANNEL_BIT	( ( unsigned long ) 0x0010 )
-#define portTIMER_VIC_ENABLE		( ( unsigned long ) 0x0020 )
+/*-----------------------------------------------------------*/
+/* Helper functions */
+extern void RegWrite( unsigned int base, unsigned int offset, unsigned int value);
+
 
 /*-----------------------------------------------------------*/
 
@@ -211,18 +211,20 @@ static void prvSetupTimerInterrupt( void )
 	
 	unsigned long ulCompareMatch;
 	extern void ( vTickISR )( void );
-	struct gptimer *gptimer1 = (struct gptimer *)GPT1;
-	struct InterruptController *intc = (struct InterruptController *)MPU_INTC;
 	extern void ( vTckISR )( void );
 
 	/* Setup interrupt handler */
 	E_IRQ = ( long ) vTickISR;
-	intc->intcSysConfig = 0x00000000;
-	intc->intcIdle = 0x00000001;//FUNCIDLE (1062)
-	/* Enable IRQ 37 - bit 5 */
-	intc->intcMir1 = 0x00000020;
 	
+	/* Enable IRQ 37 - bit 5 */
+	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000003);
+	RegWrite(MPU_INTC,INTCPS_IDLE,0x00000001);
+	RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
+	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x00000020));
+	RegWrite(MPU_INTC,INTCPS_ILSR37,0x0);
+	//dumpinterrupts();
 	serial_putstring("OK");
+	
 	serial_newline();
 	serial_putstring("Setting up the timer values...");
 	
@@ -238,11 +240,15 @@ static void prvSetupTimerInterrupt( void )
 	 * bit 0=1 -> enable timer
 	 * bit 1=1 -> autoreload
 	 * bit 6=1 -> compare mode
+	 * The source is 32Khz
 	 * */
-	gptimer1->tmar = ulCompareMatch;// load match value
-	gptimer1->tier = 0x0; 		// enable match interrupt
-	gptimer1->tclr = 0x00000023;	// start timer
-	
+	RegWrite(GPTI1,GPTI_TLDR,0);
+	RegWrite(GPTI1,GPTI_TCRR,0);
+	RegWrite(GPTI1,GPTI_TMAR,ulCompareMatch); // load match value
+	RegWrite(GPTI1,GPTI_TIER,0x1); //enable match interrupt
+
+
+	RegWrite(GPTI1,GPTI_TCLR,0x00000043);
 	serial_putstring("OK");
 	
 }

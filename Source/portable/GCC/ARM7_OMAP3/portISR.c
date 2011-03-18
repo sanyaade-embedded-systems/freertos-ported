@@ -141,32 +141,33 @@ void vTickISR( void ) __attribute__((naked));
 void vTickISR( void )
 {
 	
+	serial_putstring("ISR Routing");
 	/* Save the context of the interrupted task. */
-//	portSAVE_CONTEXT();	
+	portSAVE_CONTEXT();	
 
 	/* Increment the RTOS tick count, then look for the highest priority 
 	task that is ready to run. */
-/*	__asm volatile( "bl vTaskIncrementTick" );
+	__asm volatile( "bl vTaskIncrementTick" );
 
 	#if configUSE_PREEMPTION == 1
 		__asm volatile( "bl vTaskSwitchContext" );
 	#endif
-*/
+
 	/* Ready for the next interrupt.
 	 * Reset the timer. Clear the interrupts
 	 * Writing any value to TTGR register makes GPTimer1
 	 * reloads to the value stored in TLDR
 	 * TRM: 2599
 	 */
-	GPTI1_TISR=0x1;  // clear Match interrupt
-	GPTI1_TTGR=0xFF; // reset timer 
+	RegWrite(GPTI1,GPTI_TISR,0x1);  // clear Match interrupt
+	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer 
 
 	
 	/* Clear the interrupts
 	 * Page: 1060 */
-
+	RegWrite(MPU_INTC,INTCPS_CONTROL,0x1);
 	/* Restore the context of the new task. */
-//	portRESTORE_CONTEXT();
+	portRESTORE_CONTEXT();
 }
 /*-----------------------------------------------------------*/
 
@@ -211,9 +212,6 @@ be saved to the stack.  Instead the critical section nesting level is stored
 in a variable, which is then saved as part of the stack context. */
 void vPortEnterCritical( void )
 {
-	serial_putstring("vPortEnterCritical...");
-	serial_newline();
-
 	/* Disable interrupts as per portDISABLE_INTERRUPTS(); 							*/
 	__asm volatile ( 
 		"STMDB	SP!, {R0}			\n\t"	/* Push R0.								*/
@@ -230,9 +228,6 @@ void vPortEnterCritical( void )
 
 void vPortExitCritical( void )
 {
-	serial_putstring("vPortExitCritical...");
-	serial_newline();
-
 	if( ulCriticalNesting > portNO_CRITICAL_NESTING )
 	{
 		/* Decrement the nesting count as we are leaving a critical section. */
