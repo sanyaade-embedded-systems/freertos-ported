@@ -140,9 +140,12 @@ void vPortYieldProcessor( void )
 void vTickISR( void ) __attribute__((naked));
 void vTickISR( void )
 {
+	/* Uncomment to get the number of the IRQ
 	serial_newline();
-	serial_putstring("This is interrupt: ");
-	serial_putint(RegRead(MPU_INTC,INTCPS_ISR_SET1));
+	serial_putstring("This is interrupt: 0x");
+	serial_putint(RegRead(MPU_INTC,INTCPS_SIR_IRQ));
+	*/
+
 	/* Save the context of the interrupted task. */
 	portSAVE_CONTEXT();	
 
@@ -160,8 +163,8 @@ void vTickISR( void )
 	 * reloads to the value stored in TLDR
 	 * TRM: 2599
 	 */
-	RegWrite(GPTI1,GPTI_TISR,0x1);  // clear Match interrupt
-	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer 
+	RegWrite(GPTI2,GPTI_TISR,0x1);  // clear Match interrupt
+	RegWrite(GPTI2,GPTI_TTGR,0xFF); // reset timer 
 
 	
 	/* Clear the interrupts

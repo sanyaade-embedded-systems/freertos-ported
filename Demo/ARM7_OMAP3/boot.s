@@ -146,7 +146,7 @@ endless_loop:
 	ldr   pc, _fiq						/* FIQ - _fiq				*/
 
 _undf:  .word __undf                    /* undefined				*/
-_swi:   .word vPortYieldProcessor       /* SWI						*/
+_swi:   .word __swi		       /* SWI						*/
 _pabt:  .word __pabt                    /* program abort			*/
 _dabt:  .word __dabt                    /* data abort				*/
 _fiq:   .word __fiq                     /* FIQ						*/
@@ -155,3 +155,4 @@ __undf: b     .                         /* undefined				*/
 __pabt: b     .                         /* program abort			*/
 __dabt: b     .                         /* data abort				*/
 __fiq:  b     .                         /* FIQ						*/
+__swi:  b     .

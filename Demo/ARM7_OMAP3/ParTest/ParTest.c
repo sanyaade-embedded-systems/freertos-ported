@@ -78,6 +78,10 @@ void vParTestInitialise( void )
 	 * GPIO6: 23,10,08,02,01 */
 	RegWrite(GPIO5_BASE,GPIO_OE,~(PIN31|PIN30|PIN29|PIN28|PIN22|PIN21|PIN15|PIN14|PIN13|PIN12));
 	RegWrite(GPIO6_BASE,GPIO_OE,~(PIN23|PIN10|PIN8|PIN2|PIN1));
+
+	/* Switch off the leds */
+	RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
+
 }
 void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 {
@@ -111,10 +115,17 @@ void vParTestToggleLED( unsigned portBASE_TYPE uxLED )
 			default: break;
 		};
 
-		ulCurrentState = RegRead(GPIO5_BASE,GPIO_DATAIN);
-		/* I have to ignore the rest of the bits */
+		ulCurrentState = RegRead(GPIO5_BASE,GPIO_DATAOUT);
 		
-		if ( ulCurrentState & uxLED )
+		/* Uncoment the serial_* lines to get some debug info
+		serial_newline();
+		serial_putstring("LED: Current status : ");
+		serial_putint(RegRead(GPIO5_BASE,GPIO_DATAOUT));
+		serial_newline();
+		*/
+
+		/* I have to ignore the rest of the bits */
+		if ( ulCurrentState & GPIO_PIN )
 			RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,GPIO_PIN);
 		else
 			RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,GPIO_PIN);

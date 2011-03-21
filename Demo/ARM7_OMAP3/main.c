@@ -151,7 +151,7 @@ inline unsigned int RegRead(unsigned int base, unsigned int regOffs);
 inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value);
 inline unsigned int AddrRead(unsigned int base, unsigned int regOffs);
 void dumpinterrupts ( void );
-
+void dumptimer ( void );
 /*
  * The Beagleboard has 2 LEDS available on the GPIO module
  * I will use LED0 to express errors on tasks
@@ -238,9 +238,10 @@ int main( void )
 	serial_putstring("Starting the scheduler...");
 	vTaskStartScheduler();
 	serial_putstring("OK");
-//	serial_newline();
-//	setinterrupts();
-//	setleds();
+	
+	serial_newline();
+	setinterrupts();
+	setleds();
 	return 0;
 }
 /*-----------------------------------------------------------*/
@@ -452,23 +453,28 @@ static void setleds ( void )
 {
 	unsigned int counter=0;
 	int times=0;
-	RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN22|PIN21);
+	//RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN22|PIN21);
+	RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
 	while(times<1000){
 		for(counter=0;counter<0x2FFFF;counter++){}//delay
 		counter=0;
 		//serial_putstring("Current IRQ: ");
 		//serial_putstring(*pointer);
 		//serial_newline();
-		RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN21);
+		//RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN21);
+		vParTestToggleLED(0);
 		for(counter=0;counter<0x2FFFF;counter++){}
 		counter=0;
-		RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
+		//RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
+		vParTestToggleLED(0);
 		for(counter=0;counter<0x2FFFF;counter++){}
 		counter=0;
-		RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN22);
+		//RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,PIN22);
+		vParTestToggleLED(0);
 		for(counter=0;counter<0x2FFFF;counter++){}//delay
 		counter=0;
-		RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
+		//RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
+		vParTestToggleLED(0);
 		times++;
 	}
 }
@@ -487,11 +493,11 @@ static void setinterrupts( void ){
 	E_IRQ = ( long ) vTickISR;
 	
 	/* Enable IRQ 37 - bit 5 */
-	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000003);
+	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000002);
 	RegWrite(MPU_INTC,INTCPS_IDLE,0x00000001);
-	RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
-	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x00000020));
-	RegWrite(MPU_INTC,INTCPS_ILSR37,0x0);
+	//RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x000000FF);
+	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x00000040));
+	RegWrite(MPU_INTC,INTCPS_ILSR37,0x34);
 	dumpinterrupts();
 	serial_putstring("OK");
 	
@@ -577,6 +583,73 @@ void dumpinterrupts( void ){
 
 }
 
+void dumptimer( void ){
+	serial_newline();
+	serial_putstring("***Timer Dump (Memory)***");
+	serial_newline();
+	serial_newline();
+	serial_putstring("TIDR:0x ");
+	serial_putint(RegRead(GPTI1,GPTI_TIDR));
+	serial_newline();
+	serial_putstring("TIOCP_CFG:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TIOCP_CFG));
+	serial_newline();
+	serial_putstring("TISTAT:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TISTAT));
+	serial_newline();
+	serial_putstring("TISR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TISR));
+	serial_newline();
+	serial_putstring("TIER:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TIER));
+	serial_newline();
+	serial_putstring("TWER:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TWER));
+	serial_newline();
+	serial_putstring("TCLR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TCLR));
+	serial_newline();
+	serial_putstring("TCRR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TCRR));
+	serial_newline();
+	serial_putstring("TLDR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TLDR));
+	serial_newline();
+	serial_putstring("TTGR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TLDR));
+	serial_newline();
+	serial_putstring("TWPS:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TWPS));
+	serial_newline();
+	serial_putstring("TMAR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TMAR));
+	serial_newline();
+	serial_putstring("TCAR1:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TCAR1));
+	serial_newline();
+	serial_putstring("TSICR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TSICR));
+	serial_newline();
+	serial_putstring("TCAR2:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TCAR2));
+	serial_newline();
+	serial_putstring("TPIR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TPIR));
+	serial_newline();
+	serial_putstring("TNIR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TNIR));
+	serial_newline();
+	serial_putstring("TCVR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TCVR));
+	serial_newline();
+	serial_putstring("TOCR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TOCR));
+	serial_newline();
+	serial_putstring("TOWR:0x");
+	serial_putint(RegRead(GPTI1,GPTI_TOWR));
+	serial_newline();
+
+}
 
 
 inline unsigned int RegRead(unsigned int base, unsigned int regOffs)

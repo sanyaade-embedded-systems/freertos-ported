@@ -236,6 +236,7 @@ int printableChar(char c);
 
 /* GPTIMER REGISTERS */
 #define GPTI1		0x48318000
+#define GPTI2	0x49032000
 
 #define GPTI_TIDR		0x0
 #define GPTI_TIOCP_CFG 	0x10

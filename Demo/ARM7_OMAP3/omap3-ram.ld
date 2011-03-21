@@ -5,7 +5,7 @@ MEMORY
 	loady	: ORIGIN = 0x80e00000, LENGTH = 1M
 }
 
-__stack_end__ = 0x8C000000 + 64K - 4;
+__stack_end__ = 0x80e00000 + 64K - 4;
 
 SECTIONS 
 {

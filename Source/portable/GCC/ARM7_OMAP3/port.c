@@ -75,16 +75,12 @@
 #define portINSTRUCTION_SIZE			( ( portSTACK_TYPE ) 4 )
 #define portNO_CRITICAL_SECTION_NESTING	( ( portSTACK_TYPE ) 0 )
 
-/* Constants required to setup the tick ISR. */
-#define portENABLE_TIMER			( ( unsigned char ) 0x01 )
-#define portPRESCALE_VALUE			0x00
-#define portINTERRUPT_ON_MATCH		( ( unsigned long ) 0x01 )
-#define portRESET_COUNT_ON_MATCH	( ( unsigned long ) 0x02 )
-
 /*-----------------------------------------------------------*/
 /* Helper functions */
 extern void RegWrite( unsigned int base, unsigned int offset, unsigned int value);
-
+extern void dumpinterrupts( void );
+extern void dumptimer( void );
+extern void RegRead( unsigned int base, unsigned int offset);
 
 /*-----------------------------------------------------------*/
 
@@ -206,25 +202,30 @@ void vPortEndScheduler( void )
  */
 static void prvSetupTimerInterrupt( void )
 {
+	unsigned long ulCompareMatch;
+	extern void ( vTickISR )( void );
+	extern void ( vPortYieldProcessor ) ( void );
+
+	E_SWI = ( long ) vPortYieldProcessor;
 	serial_newline();
 	serial_putstring("Setting up the timer interrupt...");
 	
-	unsigned long ulCompareMatch;
-	extern void ( vTickISR )( void );
-	extern void ( vTckISR )( void );
-
 	/* Setup interrupt handler */
 	E_IRQ = ( long ) vTickISR;
 	
 	/* Enable IRQ 37 - bit 5 */
 	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000002);
-	while(RegRead(MPU_INTC,INTCPS_SYSSTATUS)==0)
-		serial_putchar(".");
 	RegWrite(MPU_INTC,INTCPS_IDLE,0x00000001);
+
+	/* Use it if you want to debug the interrupt */
 	//RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
-	RegWrite(MPU_INTC,INTCPS_MIR1,0x000000FF);
+	
+	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x00000040));
 	RegWrite(MPU_INTC,INTCPS_ILSR37,0x34);
-	dumpinterrupts();
+	
+	/* Use it if you ant to debug the IntC registers*/
+	//dumpinterrupts();
+	
 	serial_putstring("OK");
 	
 	serial_newline();
@@ -244,19 +245,23 @@ static void prvSetupTimerInterrupt( void )
 	 * bit 6=1 -> compare mode
 	 * The source is 32Khz
 	 * */
-	RegWrite(GPTI1,GPTI_TLDR,0); // initial value <- for reload
-	RegWrite(GPTI1,GPTI_TCRR,0); // internal counter value
-	RegWrite(GPTI1,GPTI_TMAR,0x11111111); // load match value
-	RegWrite(GPTI1,GPTI_TISR,0);
-	RegWrite(GPTI1,GPTI_TIER,0x1); //enable match interrupt
+	RegWrite(GPTI2,GPTI_TLDR,0); // initial value <- for reload
+	RegWrite(GPTI2,GPTI_TCRR,0); // internal counter value
+	RegWrite(GPTI2,GPTI_TMAR,ulCompareMatch); // load match value
+	RegWrite(GPTI2,GPTI_TISR,0);
+	RegWrite(GPTI2,GPTI_TIER,0x1); //enable match interrupt
 
 	/*
 	 * bit 0 -> start
 	 * bit 1 -> autoreload
 	 * bit 6 -> compare enabled
 	 */
-	RegWrite(GPTI1,GPTI_TCLR,0x00000043);
+	RegWrite(GPTI2,GPTI_TCLR,0x00000043);
 	serial_putstring("OK");
+	
+	/* Use it if you want to debug timer
+	 * registers */
+	//dumptimer();
 	
 }
 
