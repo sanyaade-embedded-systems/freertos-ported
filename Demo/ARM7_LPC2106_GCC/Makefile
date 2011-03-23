@@ -51,7 +51,7 @@
 #    licensing and training services.
 #*/
 
-USE_THUMB_MODE=NO
+USE_THUMB_MODE=YES
 DEBUG=-g
 OPTIM=-O0
 RUN_MODE=RUN_FROM_RAM

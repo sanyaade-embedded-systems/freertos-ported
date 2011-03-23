@@ -50,7 +50,9 @@
 #    http://www.OpenRTOS.com - Commercial support, development, porting,
 #    licensing and training services.
 #*/
-USE_THUMB_MODE=NO
+
+USE_THUMB_MODE=YES
+USE_HYPERVISOR=YES
 DEBUG=-g
 OPTIM=-O0
 RUN_MODE=RUN_FROM_RAM
@@ -67,8 +69,8 @@ WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align
 #
 # CFLAGS common to both the THUMB and ARM mode builds
 #
-CFLAGS=$(WARNINGS) -D $(RUN_MODE) -D GCC_ARM7 -I. -I../../Source/include \
-		-I../Common/include -I../$(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3 $(DEBUG) -mcpu=arm7tdmi -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
+CFLAGS=$(WARNINGS) -D $(USE_HYPERVISOR) -D $(RUN_MODE) -D GCC_ARM7 -I. -I../../Source/include \
+		-I../Common/include $(DEBUG) -mcpu=arm7tdmi -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
 	 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
 
 ifeq ($(USE_THUMB_MODE),YES)
@@ -88,7 +90,6 @@ THUMB_SRC = \
 main.c \
 ParTest/ParTest.c \
 serial/myserial.c \
-serial/serial.c \
 $(DEMO_SOURCE_DIR)/integer.c \
 $(DEMO_SOURCE_DIR)/flash.c \
 $(DEMO_SOURCE_DIR)/PollQ.c \
@@ -105,8 +106,7 @@ $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/port.c
 #
 # Source files that must be built to ARM mode.
 #
-ARM_SRC = \
-$(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c
+ARM_SRC = $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c
 
 #serial/serialISR.c
 

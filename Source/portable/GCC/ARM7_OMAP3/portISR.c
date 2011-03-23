@@ -123,8 +123,8 @@ void IRQHandler ( void ){
 	/* If this is IRQ_38 then jump to vTickISR */
 	if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==38)
 		__asm volatile ("bl vTickISR");
-	else if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==74)
-		__asm volatile ("bl vUART_ISR_Handler");
+//	else if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==74)
+//		__asm volatile ("bl vUART_ISR_Handler");
 	
 	/* Restore the context of the new task. */
 	portRESTORE_CONTEXT();
