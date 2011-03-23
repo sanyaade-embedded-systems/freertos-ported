@@ -259,6 +259,7 @@ static void prvSetupTimerInterrupt( void )
 	RegWrite(GPTI2,GPTI_TCLR,0x00000043);
 	serial_putstring("OK");
 	
+	serial_newline();
 	/* Use it if you want to debug timer
 	 * registers */
 	//dumptimer();
