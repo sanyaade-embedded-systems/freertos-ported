@@ -2,10 +2,10 @@
 
 void __attribute__((noinline)) serial_putchar(char c)
 {
-  unsigned char *const thr = (unsigned char*)(SERIAL_BASE + TRANSMIT_HOLDING_REG_OFFSET);
-  volatile unsigned char *const lsr = (unsigned char*)(SERIAL_BASE + LINE_STATUS_REG_OFFSET);
+  unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
+  volatile unsigned char *const lsr = (unsigned char*)(SERIAL_BASE + LSR_REG);
 
-  while (0 == (*lsr & LINE_STATUS_REG_TX_HOLD))
+  while (0 == (*lsr & 0x20))
   {
   }
   *thr = c;

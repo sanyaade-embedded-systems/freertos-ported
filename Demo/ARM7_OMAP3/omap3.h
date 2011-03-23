@@ -198,15 +198,6 @@ struct InterruptController
 ##############################################################################*/
 
 
-#define MPU_INTC	0x48200000
-
-/* Serial Configuration */
-#define SERIAL_BASE     0x49020000
-#define TRANSMIT_HOLDING_REG_OFFSET 0x00000000
-#define LINE_STATUS_REG_OFFSET 0x00000014
-
-#define LINE_STATUS_REG_TX_HOLD     0x20
-
 #define LINE_FEED              0xA
 #define CARRIAGE_RETURN        0xD
 #define PRINTABLE_START        0x20
@@ -463,6 +454,48 @@ int printableChar(char c);
 #define PIN30		(0x1 << 30)
 #define PIN31		(0x1 << 31)
 
+/* Serial Configuration */
+#define SERIAL_BASE     0x49020000
+#define DLL_REG		0x00
+#define RHR_REG		0x00
+#define THR_REG		0x00
+#define DLH_REG		0x04
+#define IER_REG		0x04
+#define IIR_REG		0x08
+#define FCR_REG		0x08
+#define EFR_REG		0x08
+#define LCR_REG		0x0C
+#define MCR_REG		0x01
+#define XON1_ADDR1_REG	0x10
+#define LSR_REG		0x14
+#define XON2_ADDR2_REG	0x14
+#define MSR_REG		0x18
+#define TCR_REG		0x18
+#define XOFF1_REG	0x18
+#define SPR_REG		0x18
+#define TLR_REG		0x1C
+#define XOFF2_REG	0x1C
+#define MDR1_REG	0x20
+#define MDR2_REG	0x24
+#define SFLSR_REG	0x28
+#define TXFLL_REG	0x28
+#define RESUME_REG	0x2C
+#define TXFLH_REG	0x2C
+#define SFREGL_REG	0x30
+#define RXFLL_REG	0x30
+#define SFREGH_REG	0x34
+#define RXFLH_REG	0x34
+#define UASR_REG	0x34
+#define BLR_REG		0x38
+#define ACREG_REG	0x3C
+#define SCR_REG		0x40
+#define SSR_REG		0x44
+#define EBLR_REG	0x48
+#define MVR_REG		0x50
+#define SYSC_REG	0x54
+#define SYSS_REG	0x58
+#define WER_REG		0x5C
+#define CFPS_REG	0x60
 
 
 #endif /* omap3_h */

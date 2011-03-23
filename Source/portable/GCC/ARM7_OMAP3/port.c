@@ -80,7 +80,7 @@
 extern void RegWrite( unsigned int base, unsigned int offset, unsigned int value);
 extern void dumpinterrupts( void );
 extern void dumptimer( void );
-extern void RegRead( unsigned int base, unsigned int offset);
+extern unsigned int RegRead( unsigned int base, unsigned int offset);
 
 /*-----------------------------------------------------------*/
 
@@ -204,14 +204,14 @@ static void prvSetupTimerInterrupt( void )
 {
 	unsigned long ulCompareMatch;
 	extern void ( vTickISR )( void );
+	extern void ( IRQHandler) ( void );
 	extern void ( vPortYieldProcessor ) ( void );
 
 	E_SWI = ( long ) vPortYieldProcessor;
 	serial_newline();
 	serial_putstring("Setting up the timer interrupt...");
-	
 	/* Setup interrupt handler */
-	E_IRQ = ( long ) vTickISR;
+	E_IRQ = ( long ) IRQHandler;
 	
 	/* Enable IRQ 37 - bit 5 */
 	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000002);

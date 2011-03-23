@@ -72,8 +72,8 @@
 #define configUSE_PREEMPTION		1
 #define configUSE_IDLE_HOOK		0
 #define configUSE_TICK_HOOK		0
-#define configCPU_CLOCK_HZ		( ( unsigned long ) 720000000 )	/* =720MHz */
-#define configTICK_RATE_HZ		( ( portTickType ) 10000 ) /* 1000Hz=1/1000s=1ms */
+#define configCPU_CLOCK_HZ		( ( unsigned long ) 33000000 )	/* ~=33MHz */
+#define configTICK_RATE_HZ		( ( portTickType ) 1000 ) /* configCPU_CLOCK_HZ/config_TICK_RATE_HZ = 76923076/7692 = 100000Hz=100ms */
 #define configMAX_PRIORITIES		( ( unsigned portBASE_TYPE ) 5 )
 #define configMINIMAL_STACK_SIZE	( ( unsigned short ) 128 )
 #define configTOTAL_HEAP_SIZE		( ( size_t ) ( 24 * 1024 ) )
@@ -98,5 +98,7 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelayUntil		1
 #define INCLUDE_vTaskDelay		1
 
+
+#define USE_STDIO	1
 
 #endif /* FREERTOS_CONFIG_H */

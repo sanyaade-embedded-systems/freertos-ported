@@ -123,20 +123,6 @@ void vSerialISRCreateQueues(	unsigned portBASE_TYPE uxQueueLength, xQueueHandle 
 }
 /*-----------------------------------------------------------*/
 
-void vUART_ISR_Wrapper( void )
-{
-	/* Save the context of the interrupted task. */
-	portSAVE_CONTEXT();
-
-	/* Call the handler.  This must be a separate function from the wrapper
-	to ensure the correct stack frame is set up. */
-	__asm volatile ("bl vUART_ISR_Handler");
-
-	/* Restore the context of whichever task is going to run next. */
-	portRESTORE_CONTEXT();
-}
-/*-----------------------------------------------------------*/
-
 void vUART_ISR_Handler( void )
 {
 signed char cChar;

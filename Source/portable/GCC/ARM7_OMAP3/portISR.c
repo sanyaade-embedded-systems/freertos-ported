@@ -89,6 +89,12 @@
 volatile unsigned long ulCriticalNesting = 9999UL;
 
 /*-----------------------------------------------------------*/
+extern void RegWrite( unsigned int base, unsigned int offset, unsigned int value);
+extern unsigned int RegRead( unsigned int base, unsigned int offset);
+
+/* ISR handler to decide which function to call based on incoming interrupt */
+
+void IRQHandler ( void )__attribute__((naked));
 
 /* ISR to handle manual context switches (from a call to taskYIELD()). */
 void vPortYieldProcessor( void ) __attribute__((interrupt("SWI"), naked));
@@ -107,6 +113,23 @@ void vPortISRStartFirstTask( void )
 	portRESTORE_CONTEXT();
 }
 /*-----------------------------------------------------------*/
+
+/* Read the incoming interrupt and then jump to the appropriate ISR */
+void IRQHandler ( void ){
+	
+	/* Save the context of the interrupted task. */
+	portSAVE_CONTEXT();	
+
+	/* If this is IRQ_38 then jump to vTickISR */
+	if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==38)
+		__asm volatile ("bl vTickISR");
+//	else if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==74)
+//		__asm volatile ("bl vUART_ISR_Handler");
+	
+	/* Restore the context of the new task. */
+	portRESTORE_CONTEXT();
+}
+
 
 /*
  * Called by portYIELD() or taskYIELD() to manually force a context switch.
@@ -133,11 +156,9 @@ void vPortYieldProcessor( void )
 	portRESTORE_CONTEXT();	
 }
 /*-----------------------------------------------------------*/
-
 /* 
  * The ISR used for the scheduler tick.
  */
-void vTickISR( void ) __attribute__((naked));
 void vTickISR( void )
 {
 	/* Uncomment to get the number of the IRQ
@@ -145,9 +166,6 @@ void vTickISR( void )
 	serial_putstring("This is interrupt: 0x");
 	serial_putint(RegRead(MPU_INTC,INTCPS_SIR_IRQ));
 	*/
-
-	/* Save the context of the interrupted task. */
-	portSAVE_CONTEXT();	
 
 	/* Increment the RTOS tick count, then look for the highest priority 
 	task that is ready to run. */
@@ -171,8 +189,6 @@ void vTickISR( void )
 	 * Page: 1060 */
 	RegWrite(MPU_INTC,INTCPS_ISR_CLEAR1,0x00000020);
 	RegWrite(MPU_INTC,INTCPS_CONTROL,0x1);
-	/* Restore the context of the new task. */
-	portRESTORE_CONTEXT();
 }
 /*-----------------------------------------------------------*/
 

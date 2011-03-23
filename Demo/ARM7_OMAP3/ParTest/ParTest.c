@@ -62,7 +62,10 @@
 #include "partest.h"
 #include <stdlib.h>
 
-#define partstNUM_LEDS			( 2 )
+/* Beagle board has 2 leds attched on a GPIO but I will
+ * use one of them. The other one will be used for the serial I/O
+ */
+#define partstNUM_LEDS			( 1 )
 #define partstALL_OUTPUTS_OFF	( ( unsigned long ) 0xffffffff )
 
 extern inline unsigned int RegRead(unsigned int base, unsigned int regOffs);
