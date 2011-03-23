@@ -137,9 +137,9 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 	unsigned long ulDivisor, ulWantedClock;
 	xComPortHandle xReturn = serHANDLE;
 	extern void ( vUART_ISR_Wrapper )( void );
-	volatile unsigned char *const efr;
-	volatile unsigned char *const mcr;
-
+	volatile unsigned char *efr;
+	volatile unsigned char *mcr;
+	volatile unsigned char *lcr;
 	/* The queues are used in the serial ISR routine, so are created from
 	serialISR.c (which is always compiled to ARM mode. */
 	vSerialISRCreateQueues( uxQueueLength, &xRxedChars, &xCharsForTx, &plTHREEmpty );
@@ -156,21 +156,28 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 			ulWantedClock = ulWantedBaud * serWANTED_CLOCK_SCALING;
 			ulDivisor = configCPU_CLOCK_HZ / ulWantedClock;
 
+			/* Software Reset 17.5.1.1.1 (2681) */
 			/* Reset the UART Interface (2681)*/
 			RegWrite(SERIAL_BASE,SYSC_REG,0x1);
 			/* Poll the SYSS_REG bit 0 until it equals to 1 */
-			while(!(RegRead(SERIAL_BASE,SYSS_REG) & 0x1)){}
-			
-			/* Save the value of EFR_REG register */
-			efr=(unsigned char*)(SERIAL_BASE + EFR_REG);
+			while((RegRead(SERIAL_BASE,SYSS_REG) & 0x1) != 1){}
+		
+			/* FIFOS and DMA Settings 17.5.1.1.2 */
+			/* Swich to mode B */
+			lcr=(unsigned char*)(SERIAL_BASE + LCR_REG);
+			RegWrite(SERIAL_BASE,LCR_REG,0x00BF);
 
+			/* Save 4th bit (ENHANCED_EN) of EFR_REG register */
+			efr=(unsigned char*)((SERIAL_BASE + EFR_REG)&0x10);
 			/* Enable enhanced features */
-			RegWrite(SERIAL_BASE,EFR_REG,efr|0x10);
+			RegWrite(SERIAL_BASE,EFR_REG,(*efr|=0x10));
 
 			/* Switch to mode A */
 			RegWrite(SERIAL_BASE,MCR_REG,0x80);
-			mcr=(unsigned char*)((SERIAL_BASE + TCR_TRL) & 0x40);
-			RegWrite(SERIAL_BASE,MCR_REG,mcr|0x40);
+			
+			/* Save 6th bit of MCR Register */
+			mcr=(unsigned char*)((SERIAL_BASE + MCR_REG) & 0x40);
+			RegWrite(SERIAL_BASE,MCR_REG,(*mcr|0x40));
 			
 			/* Enable Fifo, clear Tx/Rx */
 			RegWrite(SERIAL_BASE,FCR_REG,0x7);
@@ -179,17 +186,17 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 			RegWrite(SERIAL_BASE,LCR_REG,0x00BF);
 
 			/* Setup trigger levels for interrupt generation */
-			RegWrite(SERIAL_BASE,TLR_REG,0x88);
-			RegWrite(SERIAL_BASE,SCR_REG,0x1);
+			RegWrite(SERIAL_BASE,TLR_REG,0x0);
+			RegWrite(SERIAL_BASE,SCR_REG,0x0);
 
 			/* Restore efr value */
-			RegWrite(SERIAL_BASE,EFR_REG,efr);
+			RegWrite(SERIAL_BASE,EFR_REG,EFR_REG|efr);
 
 			/* Switch to mode A */
 			RegWrite(SERIAL_BASE,LCR_REG,0x80);
 
 			/* Restore MCR register */
-			RegWrite(SERIAL_BASE,MCR_REG,mcr);
+			RegWrite(SERIAL_BASE,MCR_REG,MRC|mcr);
 
 			/* Restore LCR */
 			RegWrite(SERIAL_BASE,LCR_REG,lcr);
@@ -203,7 +210,7 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 			RegWrite(SERIAL_BASE,LCR_REG,0x00BF);
 
 			/* Enable access to IER_REG */
-			efr=RegRead(SERIAL_BASE,EFR_REG);
+			efr=(unsigned char*)(RegRead(SERIAL_BASE,EFR_REG) & 0x10);
 			RegWrite(SERIAL_BASE,EFR_REG,efr|0x10);
 
 			/* Switch to register operational mode */
@@ -215,16 +222,15 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 			/* Switch to mode B */
 			RegWrite(SERIAL_BASE,LCR_REG,0x00BF);
 
-			/* Setup divisor */
-			RegWrite(SERIAL_BASE,DLL_REG,ulDivisor);
-			ulDivisor >>= 8;
-			RegWrite(SERIAL_BASE,DHL_REG,ulDivisor);
+			/* Setup divisor. Baud Rate 115200 */
+			RegWrite(SERIAL_BASE,DLL_REG,0x1A);
+			RegWrite(SERIAL_BASE,DHL_REG,0x00);
 
 			/* Switch to operational mode */
 			RegWrite(SERIAL_BASE,LCR_REG,0x0);
 
 			/* Load Interrupt Configuration */
-			RegWrite(SERIAL_BASE,IER_REG,0x3);
+			RegWrite(SERIAL_BASE,IER_REG,0x2);
 
 			/* Switch to mode B */
 			RegWrite(SERIAL_BASE,LCR_REG,0x00BF);

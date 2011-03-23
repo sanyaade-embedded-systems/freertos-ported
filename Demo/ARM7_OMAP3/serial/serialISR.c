@@ -78,11 +78,16 @@
 #define serCLEAR_VIC_INTERRUPT			( ( unsigned long ) 0 )
 
 /* Constants to determine the ISR source. */
-#define serSOURCE_THRE					( ( unsigned char ) 0x02 )
-#define serSOURCE_RX_TIMEOUT			( ( unsigned char ) 0x0c )
-#define serSOURCE_ERROR					( ( unsigned char ) 0x06 )
-#define serSOURCE_RX					( ( unsigned char ) 0x04 )
-#define serINTERRUPT_SOURCE_MASK		( ( unsigned char ) 0x0f )
+#define serSOURCE_THRE				((unsigned char)0x1)
+#define serSOURCE_RHR				((unsigned char)0x2)
+#define serSOURCE_RX_TIMEOUT			((unsigned char)0x6)
+#define serSOURCE_SPECIAL_CHAR			((unsigned char)0x8)
+//#define serSOURCE_ERROR				((unsigned char)0x3)
+//#define serSOURCE_THRE					( ( unsigned char ) 0x02 )
+//#define serSOURCE_RX_TIMEOUT			( ( unsigned char ) 0x0c )
+//#define serSOURCE_ERROR					( ( unsigned char ) 0x06 )
+//#define serSOURCE_RX					( ( unsigned char ) 0x04 )
+#define serINTERRUPT_SOURCE_MASK		( ( unsigned char ) 0x1E ) // we only care about bits 5:1
 
 /* Queues used to hold received characters, and characters waiting to be
 transmitted. */
@@ -97,9 +102,6 @@ static volatile long lTHREEmpty;
  * Obtain references to the queues and THRE Empty flag. 
  */
 void vSerialISRCreateQueues( unsigned portBASE_TYPE uxQueueLength, xQueueHandle *pxRxedChars, xQueueHandle *pxCharsForTx, long volatile **pplTHREEmptyFlag );
-
-/* UART0 interrupt service routine entry point. */
-void vUART_ISR_Wrapper( void ) __attribute__ ((naked));
 
 /* UART0 interrupt service routine handler. */
 void vUART_ISR_Handler( void ) __attribute__ ((noinline));
@@ -125,11 +127,14 @@ void vSerialISRCreateQueues(	unsigned portBASE_TYPE uxQueueLength, xQueueHandle 
 
 void vUART_ISR_Handler( void )
 {
-signed char cChar;
-portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	signed char cChar;
+	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
+	unsigned char *const rhr = (unsigned char*)(SERIAL_BASE + RHR_REG);
+	volatile unsigned char *const lsr = (unsigned char*)(SERIAL_BASE + LSR_REG);
 
 	/* What caused the interrupt? */
-	switch( UART0_IIR & serINTERRUPT_SOURCE_MASK )
+	switch( RegRead(SERIAL_BASE,IIR_REG) & serINTERRUPT_SOURCE_MASK )
 	{
 		case serSOURCE_ERROR :	/* Not handling this, but clear the interrupt. */
 								cChar = UART0_LSR;
@@ -139,7 +144,7 @@ portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 								character in the Tx queue, send it now. */
 								if( xQueueReceiveFromISR( xCharsForTx, &cChar, &xHigherPriorityTaskWoken ) == pdTRUE )
 								{
-									UART0_THR = cChar;
+									*thr = cChar;
 								}
 								else
 								{
@@ -153,7 +158,7 @@ portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 		case serSOURCE_RX_TIMEOUT :
 		case serSOURCE_RX	:	/* A character was received.  Place it in 
 								the queue of received characters. */
-								cChar = UART0_RBR;
+								cChar = *rhr;
 								xQueueSendFromISR( xRxedChars, &cChar, &xHigherPriorityTaskWoken );
 								break;
 
@@ -167,7 +172,8 @@ portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	}
 
 	/* Clear the ISR in the VIC. */
-	VICVectAddr = serCLEAR_VIC_INTERRUPT;
+	//VICVectAddr = serCLEAR_VIC_INTERRUPT;
+	RegWrite(MPU_INTC,INTCPS_ISR_CLEAR2,0x00000400);
 }
 
 

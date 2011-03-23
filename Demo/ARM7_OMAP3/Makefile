@@ -88,6 +88,7 @@ THUMB_SRC = \
 main.c \
 ParTest/ParTest.c \
 serial/myserial.c \
+serial/serial.c \
 $(DEMO_SOURCE_DIR)/integer.c \
 $(DEMO_SOURCE_DIR)/flash.c \
 $(DEMO_SOURCE_DIR)/PollQ.c \
