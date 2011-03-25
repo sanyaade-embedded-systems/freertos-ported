@@ -69,7 +69,7 @@
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
 
-#define configUSE_PREEMPTION		1
+#define configUSE_PREEMPTION		0
 #define configUSE_IDLE_HOOK		0
 #define configUSE_TICK_HOOK		0
 /* This is the deal with the clocks
@@ -114,7 +114,5 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelayUntil		1
 #define INCLUDE_vTaskDelay		1
 
-
-#define USE_STDIO	1
 
 #endif /* FREERTOS_CONFIG_H */

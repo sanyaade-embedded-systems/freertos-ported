@@ -224,7 +224,7 @@ int main( void )
 	/* start the check task - which is defined in this file!. */
 	serial_putstring("Starting ErrorChecks task...");
 	
-	xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	//xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
 	
 	serial_putstring("OK");
 	serial_newline();
