@@ -2,10 +2,10 @@ MEMORY
 {
 	q0	: ORIGIN = 0, LENGTH = 1000M
 	q1	: ORIGIN = 0x40000000, LENGTH = 1000M
-	loady	: ORIGIN = 0x80e00000, LENGTH = 1M
+	loady	: ORIGIN = 0x80300000, LENGTH = 1M
 }
 
-__stack_end__ = 0x80e00000 + 64K - 4;
+__stack_end__ = 0x80800000 + 64K - 4;
 
 SECTIONS 
 {

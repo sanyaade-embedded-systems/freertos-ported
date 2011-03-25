@@ -51,13 +51,13 @@
 #    licensing and training services.
 #*/
 
-USE_THUMB_MODE=YES
+USE_THUMB_MODE=NO
 USE_HYPERVISOR=YES
 DEBUG=-g
 OPTIM=-O0
 RUN_MODE=RUN_FROM_RAM
 LDSCRIPT=omap3-ram.ld
-TEXT_BASE = 0x80e00000
+TEXT_BASE = 0x80300000
 
 CC=arm-elf-gcc
 OBJCOPY=arm-elf-objcopy
