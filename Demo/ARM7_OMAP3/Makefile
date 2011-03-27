@@ -59,9 +59,9 @@ RUN_MODE=RUN_FROM_RAM
 LDSCRIPT=omap3-ram.ld
 TEXT_BASE = 0x80300000
 
-CC=arm-elf-gcc
-OBJCOPY=arm-elf-objcopy
-ARCH=arm-elf-ar
+CC=arm-none-eabi-gcc
+OBJCOPY=arm-none-eabi-objcopy
+ARCH=arm-none-eabi-ar
 CRT0=boot.s
 WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wsign-compare \
 		-Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wunused
@@ -70,7 +70,7 @@ WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align
 # CFLAGS common to both the THUMB and ARM mode builds
 #
 CFLAGS=$(WARNINGS) -D $(USE_HYPERVISOR) -D $(RUN_MODE) -D GCC_ARM7 -I. -I../../Source/include \
-		-I../Common/include $(DEBUG) -mcpu=arm7tdmi -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
+		-I../Common/include $(DEBUG) -mcpu=cortex-a8 -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
 	 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
 
 ifeq ($(USE_THUMB_MODE),YES)
