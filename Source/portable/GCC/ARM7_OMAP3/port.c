@@ -208,8 +208,6 @@ static void prvSetupTimerInterrupt( void )
 	extern void ( vPortYieldProcessor ) ( void );
 
 	E_SWI = ( long ) vPortYieldProcessor;
-	serial_newline();
-	serial_putstring("Setting up the timer interrupt...");
 	/* Setup interrupt handler */
 	E_IRQ = ( long ) IRQHandler;
 	
@@ -225,11 +223,6 @@ static void prvSetupTimerInterrupt( void )
 	
 	/* Use it if you ant to debug the IntC registers*/
 	//dumpinterrupts();
-	
-	serial_putstring("OK");
-	
-	serial_newline();
-	serial_putstring("Setting up the timer values...");
 	
 	/* Calculate the match value required for our wanted tick rate */
 	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
@@ -257,9 +250,6 @@ static void prvSetupTimerInterrupt( void )
 	 * bit 6 -> compare enabled
 	 */
 	RegWrite(GPTI2,GPTI_TCLR,0x00000043);
-	serial_putstring("OK");
-	
-	serial_newline();
 	/* Use it if you want to debug timer
 	 * registers */
 	//dumptimer();

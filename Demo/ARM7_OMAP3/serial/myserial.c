@@ -1,12 +1,17 @@
 #include "omap3.h"
 
+inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value);
+
 void __attribute__((noinline)) serial_putchar(char c)
 {
-  unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
+  volatile unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
   volatile unsigned char *const lsr = (unsigned char*)(SERIAL_BASE + LSR_REG);
-
+  int count=0;
   while (0 == (*lsr & 0x20))
   {
+  count++;
+  /* Clear the damn FIFO anyway */
+  if(count==100)RegWrite(SERIAL_BASE,FCR_REG,0x2);
   }
   *thr = c;
   return;
