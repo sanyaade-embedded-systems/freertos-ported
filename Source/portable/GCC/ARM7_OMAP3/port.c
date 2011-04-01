@@ -208,28 +208,21 @@ static void prvSetupTimerInterrupt( void )
 	extern void ( vPortYieldProcessor ) ( void );
 
 	E_SWI = ( long ) vPortYieldProcessor;
-	serial_newline();
-	serial_putstring("Setting up the timer interrupt...");
 	/* Setup interrupt handler */
 	E_IRQ = ( long ) IRQHandler;
 	
 	/* Enable IRQ 37 - bit 5 */
-	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000002);
-	RegWrite(MPU_INTC,INTCPS_IDLE,0x00000001);
+	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000001);
+	RegWrite(MPU_INTC,INTCPS_IDLE,0x00000002);
 
 	/* Use it if you want to debug the interrupt */
 	//RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
 	
-	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x00000040));
+	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x0000020));
 	RegWrite(MPU_INTC,INTCPS_ILSR37,0x34);
 	
 	/* Use it if you ant to debug the IntC registers*/
 	//dumpinterrupts();
-	
-	serial_putstring("OK");
-	
-	serial_newline();
-	serial_putstring("Setting up the timer values...");
 	
 	/* Calculate the match value required for our wanted tick rate */
 	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
@@ -245,21 +238,18 @@ static void prvSetupTimerInterrupt( void )
 	 * bit 6=1 -> compare mode
 	 * The source is 32Khz
 	 * */
-	RegWrite(GPTI2,GPTI_TLDR,0); // initial value <- for reload
-	RegWrite(GPTI2,GPTI_TCRR,0); // internal counter value
-	RegWrite(GPTI2,GPTI_TMAR,ulCompareMatch); // load match value
-	RegWrite(GPTI2,GPTI_TISR,0);
-	RegWrite(GPTI2,GPTI_TIER,0x1); //enable match interrupt
+	RegWrite(GPTI1,GPTI_TLDR,0); // initial value <- for reload
+	RegWrite(GPTI1,GPTI_TCRR,0); // internal counter value
+	RegWrite(GPTI1,GPTI_TMAR,ulCompareMatch); // load match value
+	RegWrite(GPTI1,GPTI_TISR,0);
+	RegWrite(GPTI1,GPTI_TIER,0x1); //enable match interrupt
 
 	/*
 	 * bit 0 -> start
 	 * bit 1 -> autoreload
 	 * bit 6 -> compare enabled
 	 */
-	RegWrite(GPTI2,GPTI_TCLR,0x00000043);
-	serial_putstring("OK");
-	
-	serial_newline();
+	RegWrite(GPTI1,GPTI_TCLR,0x00000043);
 	/* Use it if you want to debug timer
 	 * registers */
 	//dumptimer();
