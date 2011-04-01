@@ -195,7 +195,7 @@ int main( void )
 {
 	/* Setup the hardware for use with the Beableboard. */
 #ifdef DEBUG
-	serial_putstring("Initializing hardware");
+	serial_putstring("Initializing hardware...");
 #endif
 	prvSetupHardware();
 #ifdef DEBUG
@@ -205,7 +205,7 @@ int main( void )
 	/* Start the demo/test application tasks. */
 	/* We need a minimal environment for the hypervisor */
 #ifdef DEBUG
-	serial_putstring("Starting Demo applications");
+	serial_putstring("Starting Demo applications...");
 #endif
 	vStartLEDFlashTasks (mainLED_TASK_PRIORITY);
 #if HYPERVISOR==NO
@@ -231,12 +231,12 @@ int main( void )
 	 * projects then ensure Supervisor mode is used here */
 	/* Should never reach here! */
 #ifdef  DEBUG
-	serial_putstring("Starting the scheduler");
+	serial_putstring("Starting the scheduler...");
 #endif
 	vTaskStartScheduler();
 #ifdef DEBUG
 	serial_putstring("OK");
-        serial_newlien();
+        serial_newline();
 #endif
 	return 0;
 }
