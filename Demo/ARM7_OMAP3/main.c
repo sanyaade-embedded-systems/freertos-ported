@@ -194,18 +194,35 @@ static void vMemCheckTask( void *pvParameters );
 int main( void )
 {
 	/* Setup the hardware for use with the Beableboard. */
+#ifdef DEBUG
+	serial_putstring("Initializing hardware");
+#endif
 	prvSetupHardware();
+#ifdef DEBUG
+	serial_putstring("OK");
+	serial_newline();
+#endif
 	/* Start the demo/test application tasks. */
 	/* We need a minimal environment for the hypervisor */
+#ifdef DEBUG
+	serial_putstring("Starting Demo applications");
+#endif
 	vStartLEDFlashTasks (mainLED_TASK_PRIORITY);
-#if HYPERVISOR==YES
+#if HYPERVISOR==NO
 	vStartIntegerMathTasks ( tskIDLE_PRIORITY );
 	vStartPolledQueueTasks ( mainQUEUE_POLL_PRIORITY );
 	vStartMathTasks ( tskIDLE_PRIORITY );
 	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartDynamicPriorityTasks();
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
+	/* start the check task - which is defined in this file!. */
+	xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
 #endif
+#ifdef DEBUG
+	serial_putstring("OK");
+	serial_newline();
+#endif
+
 	/* Now all the tasks have been stared - start the scheduler.
 	 * NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
 	 * Te processor MUST be in supervisor mode when vTaskStartScheduler is called.
@@ -213,8 +230,14 @@ int main( void )
 	 * mode prior to main being called. If you are not using one of these demo application
 	 * projects then ensure Supervisor mode is used here */
 	/* Should never reach here! */
-	
+#ifdef  DEBUG
+	serial_putstring("Starting the scheduler");
+#endif
 	vTaskStartScheduler();
+#ifdef DEBUG
+	serial_putstring("OK");
+        serial_newlien();
+#endif
 	return 0;
 }
 /*-----------------------------------------------------------*/
