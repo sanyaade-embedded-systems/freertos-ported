@@ -121,7 +121,7 @@ void IRQHandler ( void ){
 	portSAVE_CONTEXT();	
 
 	/* If this is IRQ_38 then jump to vTickISR */
-	if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==38)
+	if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==37)
 		__asm volatile ("bl vTickISR");
 //	else if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==74)
 //		__asm volatile ("bl vUART_ISR_Handler");
@@ -181,8 +181,8 @@ void vTickISR( void )
 	 * reloads to the value stored in TLDR
 	 * TRM: 2599
 	 */
-	RegWrite(GPTI2,GPTI_TISR,0x1);  // clear Match interrupt
-	RegWrite(GPTI2,GPTI_TTGR,0xFF); // reset timer 
+	RegWrite(GPTI1,GPTI_TISR,0x1);  // clear Match interrupt
+	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer 
 
 	
 	/* Clear the interrupts
