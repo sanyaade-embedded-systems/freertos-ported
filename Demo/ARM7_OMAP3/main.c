@@ -204,20 +204,29 @@ int main( void )
 #endif
 	/* Start the demo/test application tasks. */
 	/* We need a minimal environment for the hypervisor */
+
 #ifdef DEBUG
 	serial_putstring("Starting Demo applications...");
 #endif
+
 	vStartLEDFlashTasks (mainLED_TASK_PRIORITY);
-#if HYPERVISOR==NO
+#if USE_HYPERVISOR==NO
 	vStartIntegerMathTasks ( tskIDLE_PRIORITY );
 	vStartPolledQueueTasks ( mainQUEUE_POLL_PRIORITY );
 	vStartMathTasks ( tskIDLE_PRIORITY );
 	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartDynamicPriorityTasks();
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
+#ifdef DEGUG
+	serial_putstring("Starting ErrorControl task...");
 	/* start the check task - which is defined in this file!. */
 	xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	serial_putstring("OK");
+	serial_newline();
 #endif
+	
+#endif
+
 #ifdef DEBUG
 	serial_putstring("OK");
 	serial_newline();
