@@ -218,7 +218,7 @@ static void prvSetupTimerInterrupt( void )
 	/* Use it if you want to debug the interrupt */
 	//RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
 	
-	RegWrite(MPU_INTC,INTCPS_MIR1,~(0x00000020));
+	RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,0x00000020);
 	RegWrite(MPU_INTC,INTCPS_ILSR37,0x34);
 	
 	/* Use it if you ant to debug the IntC registers*/
