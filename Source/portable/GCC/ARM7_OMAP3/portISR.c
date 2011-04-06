@@ -187,7 +187,7 @@ void vTickISR( void )
 	
 	/* Clear the interrupts
 	 * Page: 1060 */
-	RegWrite(MPU_INTC,INTCPS_ISR_CLEAR1,0x00000020);
+	RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,0x00000020);
 	RegWrite(MPU_INTC,INTCPS_CONTROL,0x1);
 }
 /*-----------------------------------------------------------*/

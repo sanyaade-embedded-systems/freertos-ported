@@ -84,11 +84,8 @@ void vParTestInitialise( void )
 
 	/* Switch off the leds */
 	RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
-
-	/* UART is a FIFO */
-	RegWrite(SERIAL_BASE,FCR_REG,0x1);
-
 }
+
 void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 {
 	unsigned long GPIO_PIN = 0;
