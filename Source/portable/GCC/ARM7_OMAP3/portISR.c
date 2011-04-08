@@ -184,10 +184,12 @@ void vTickISR( void )
 	RegWrite(GPTI1,GPTI_TISR,0x1);  // clear Match interrupt
 	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer 
 
-	
 	/* Clear the interrupts
 	 * Page: 1060 */
 	RegWrite(MPU_INTC,INTCPS_CONTROL,0x1);
+	/* Make sure mask is correct after handling the IRQ */
+    RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,0x00000020);
+
 }
 /*-----------------------------------------------------------*/
 

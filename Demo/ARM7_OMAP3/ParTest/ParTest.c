@@ -71,12 +71,25 @@
 extern inline unsigned int RegRead(unsigned int base, unsigned int regOffs);
 extern inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value);
 
+/* Setup Interrupt Vector */
+static void setupInterruptVector( void )
+{
+	extern void ( IRQHandler) ( void );
+	extern void ( vPortYieldProcessor ) ( void );
+	E_SWI = ( long ) vPortYieldProcessor;
+	/* Setup interrupt handler */
+	E_IRQ = ( long ) IRQHandler;
+}
+
 /*-----------------------------------------------------------
  * Simple parallel port IO routines.
  *-----------------------------------------------------------*/
 
 void vParTestInitialise( void )
 {
+	
+	setupInterruptVector();
+
 	/* GPIO5: 31,30,29,28,22,21,15,14,13,12
 	 * GPIO6: 23,10,08,02,01 */
 	RegWrite(GPIO5_BASE,GPIO_OE,~(PIN31|PIN30|PIN29|PIN28|PIN22|PIN21|PIN15|PIN14|PIN13|PIN12));

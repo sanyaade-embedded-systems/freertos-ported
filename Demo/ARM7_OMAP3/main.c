@@ -210,14 +210,17 @@ int main( void )
 #endif
 
 	vStartLEDFlashTasks (mainLED_TASK_PRIORITY);
-#if USE_HYPERVISOR==NO
+#ifndef USE_HYPERVISOR
+	serial_newline();
+	serial_putstring("Starting full test suite...");
 	vStartIntegerMathTasks ( tskIDLE_PRIORITY );
 	vStartPolledQueueTasks ( mainQUEUE_POLL_PRIORITY );
 	vStartMathTasks ( tskIDLE_PRIORITY );
 	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartDynamicPriorityTasks();
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
-#ifdef DEGUG
+	serial_putstring("OK");
+	serial_newline();
 	serial_putstring("Starting ErrorControl task...");
 	/* start the check task - which is defined in this file!. */
 	xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
@@ -225,7 +228,6 @@ int main( void )
 	serial_newline();
 #endif
 	
-#endif
 
 #ifdef DEBUG
 	serial_putstring("OK");

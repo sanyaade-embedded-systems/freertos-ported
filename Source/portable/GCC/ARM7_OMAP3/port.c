@@ -197,6 +197,7 @@ void vPortEndScheduler( void )
 }
 /*-----------------------------------------------------------*/
 
+
 /*
  * Setup the timer 0 to generate the tick interrupts at the required frequency.
  */
@@ -204,12 +205,6 @@ static void prvSetupTimerInterrupt( void )
 {
 	unsigned long ulCompareMatch;
 	extern void ( vTickISR )( void );
-	extern void ( IRQHandler) ( void );
-	extern void ( vPortYieldProcessor ) ( void );
-
-	E_SWI = ( long ) vPortYieldProcessor;
-	/* Setup interrupt handler */
-	E_IRQ = ( long ) IRQHandler;
 	
 	/* Enable IRQ 37 - bit 5 */
 	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000002);
@@ -241,9 +236,16 @@ static void prvSetupTimerInterrupt( void )
 	RegWrite(GPTI1,GPTI_TLDR,0); // initial value <- for reload
 	RegWrite(GPTI1,GPTI_TCRR,0); // internal counter value
 	RegWrite(GPTI1,GPTI_TMAR,ulCompareMatch); // load match value
+	/* Use a really big number for debug purposes. Slower IRQs
+	 * will enable you to trace the context switching process
+	 */
+	//RegWrite(GPTI1,GPTI_TMAR, 0x99999999);
 	RegWrite(GPTI1,GPTI_TISR,0);
 	RegWrite(GPTI1,GPTI_TIER,0x1); //enable match interrupt
 
+	//reset the timer
+	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer	
+	
 	/*
 	 * bit 0 -> start
 	 * bit 1 -> autoreload

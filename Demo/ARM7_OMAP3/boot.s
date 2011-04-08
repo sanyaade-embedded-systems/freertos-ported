@@ -145,14 +145,13 @@ endless_loop:
 	ldr   pc, [pc,#-0xFF0]				/* IRQ - read the VIC		*/
 	ldr   pc, _fiq						/* FIQ - _fiq				*/
 
-_undf:  .word __undf                    /* undefined				*/
-_swi:   .word __swi		       /* SWI						*/
-_pabt:  .word __pabt                    /* program abort			*/
-_dabt:  .word __dabt                    /* data abort				*/
-_fiq:   .word __fiq                     /* FIQ						*/
+_undf:  .word 0x4020FFE4                    /* undefined				*/
+_swi:   .word 0x4020FFE8	        /* SWI						*/
+_pabt:  .word 0x4020FFEC                    /* program abort			*/
+_dabt:  .word 0x4020FFF0                    /* data abort				*/
+_fiq:   .word 0x4020FFFc                     /* FIQ						*/
 
 __undf: b     .                         /* undefined				*/
 __pabt: b     .                         /* program abort			*/
 __dabt: b     .                         /* data abort				*/
 __fiq:  b     .                         /* FIQ						*/
-__swi:  b     .
