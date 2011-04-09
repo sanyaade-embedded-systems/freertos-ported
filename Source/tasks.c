@@ -610,7 +610,6 @@ tskTCB * pxNewTCB;
 		{
 			/* Generate the tick time at which the task wants to wake. */
 			xTimeToWake = *pxPreviousWakeTime + xTimeIncrement;
-
 			if( xTickCount < *pxPreviousWakeTime )
 			{
 				/* The tick count has overflowed since this function was

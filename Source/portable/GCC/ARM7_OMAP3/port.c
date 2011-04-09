@@ -213,7 +213,7 @@ static void prvSetupTimerInterrupt( void )
 	/* Use it if you want to debug the interrupt */
 	//RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
 	
-	RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,0x00000020);
+	RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,~(RegRead(MPU_INTC,INTCPS_MIR1))|0x00000020);
 	RegWrite(MPU_INTC,INTCPS_ILSR37,0x34);
 	
 	/* Use it if you ant to debug the IntC registers*/
@@ -233,6 +233,7 @@ static void prvSetupTimerInterrupt( void )
 	 * bit 6=1 -> compare mode
 	 * The source is 32Khz
 	 * */
+	RegWrite(GPTI1,GPTI_TIOCP_CFG,0x2); // reset interface
 	RegWrite(GPTI1,GPTI_TLDR,0); // initial value <- for reload
 	RegWrite(GPTI1,GPTI_TCRR,0); // internal counter value
 	RegWrite(GPTI1,GPTI_TMAR,ulCompareMatch); // load match value
@@ -243,9 +244,6 @@ static void prvSetupTimerInterrupt( void )
 	RegWrite(GPTI1,GPTI_TISR,0);
 	RegWrite(GPTI1,GPTI_TIER,0x1); //enable match interrupt
 
-	//reset the timer
-	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer	
-	
 	/*
 	 * bit 0 -> start
 	 * bit 1 -> autoreload
@@ -256,6 +254,9 @@ static void prvSetupTimerInterrupt( void )
 	 * registers */
 	//dumptimer();
 	
+	/* Now that the timer is configured, RESET IT */
+	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer	
+
 }
 
 

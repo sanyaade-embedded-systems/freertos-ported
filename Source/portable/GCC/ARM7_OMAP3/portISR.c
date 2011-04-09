@@ -180,15 +180,15 @@ void vTickISR( void )
 	 * Writing any value to TTGR register makes GPTimer1
 	 * reloads to the value stored in TLDR
 	 * TRM: 2599
+	 * Clear the interrupts
+	 * Page: 1060 
 	 */
+	RegWrite(MPU_INTC,INTCPS_CONTROL,0x1);
+	/* Make sure mask is correct after handling the IRQ */
+    RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,~(RegRead(MPU_INTC,INTCPS_MIR1))|0x00000020);
 	RegWrite(GPTI1,GPTI_TISR,0x1);  // clear Match interrupt
 	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer 
 
-	/* Clear the interrupts
-	 * Page: 1060 */
-	RegWrite(MPU_INTC,INTCPS_CONTROL,0x1);
-	/* Make sure mask is correct after handling the IRQ */
-    RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,0x00000020);
 
 }
 /*-----------------------------------------------------------*/
