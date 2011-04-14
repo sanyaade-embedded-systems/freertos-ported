@@ -126,16 +126,14 @@ unsigned portBASE_TYPE uxLED;
 	/* We will turn the LED on and off again in the delay period, so each
 	delay is only half the total period. */
 	xFlashRate /= ( portTickType ) 2;
-
+	xLastFlashTime = xTaskGetTickCount();
 	for(;;)
 	{
 		/* We need to initialise xLastFlashTime prior to the first call to 
 		vTaskDelayUntil(). */
-		xLastFlashTime = xTaskGetTickCount();
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		vParTestToggleLED( uxLED );
 		/* Delay for half the flash period then turn the LED off. */
-		xLastFlashTime = xTaskGetTickCount();
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		vParTestToggleLED( uxLED );
 	}

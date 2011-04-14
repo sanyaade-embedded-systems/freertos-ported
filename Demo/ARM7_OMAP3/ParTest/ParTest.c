@@ -119,7 +119,7 @@ void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 
 void vParTestToggleLED( unsigned portBASE_TYPE uxLED )
 {
-	unsigned long ulCurrentState, mask=0, GPIO_PIN=0;
+	unsigned long ulCurrentState, GPIO_PIN=0;
 	if( uxLED < partstNUM_LEDS )
 	{
 		/* Toggle LED Status
