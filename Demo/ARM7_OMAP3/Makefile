@@ -51,7 +51,7 @@
 #    licensing and training services.
 #*/
 
-USE_THUMB_MODE=NO
+USE_THUMB_MODE=YES
 USE_HYPERVISOR=NO
 DEBUG=-g
 OPTIM=-O0
@@ -83,7 +83,7 @@ ifeq ($(USE_HYPERVISOR),YES)
 endif
 
 
-LINKER_FLAGS=-Xlinker -ortosdemo.elf -Xlinker -M -Xlinker -Map=rtosdemo.map
+LINKER_FLAGS=-Xlinker -o$(TARGET).elf -Xlinker -M -Xlinker -Map=$(TARGET).map
 
 RTOS_SOURCE_DIR=../../Source
 DEMO_SOURCE_DIR=../Common/Minimal
@@ -120,13 +120,19 @@ ARM_SRC = $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c
 ARM_OBJ = $(ARM_SRC:.c=.o)
 THUMB_OBJ = $(THUMB_SRC:.c=.o)
 
-rtosdemo.bin : rtosdemo.elf
-	$(OBJCOPY) rtosdemo.elf -O binary rtosdemo.bin
+ifeq ($(USE_THUMB_MODE),YES)
+	TARGET=rtosdemo-t
+else
+	TARGET=rtosdemo-a
+endif
 
-rtosdemo.hex : rtosdemo.elf
-	$(OBJCOPY) rtosdemo.elf -O ihex rtosdemo.hex
+$(TARGET).bin : $(TARGET).elf
+	$(OBJCOPY) $(TARGET).elf -O binary $(TARGET).bin
 
-rtosdemo.elf : $(ARM_OBJ) $(THUMB_OBJ) $(CRT0) Makefile
+$(TARGET).hex : $(TARGET).elf
+	$(OBJCOPY) $(TARGET).elf -O ihex $(TARGET).hex
+
+$(TARGET).elf : $(ARM_OBJ) $(THUMB_OBJ) $(CRT0) Makefile
 	$(CC) $(CFLAGS) $(ARM_OBJ) $(THUMB_OBJ) -nostartfiles $(CRT0) $(LINKER_FLAGS)
 
 $(THUMB_OBJ) : %.o : %.c $(LDSCRIPT) Makefile
@@ -137,7 +143,7 @@ $(ARM_OBJ) : %.o : %.c $(LDSCRIPT) Makefile
 
 clean :
 	rm -rf $(ARM_OBJ) $(THUMB_OBJ)
-	rm -rf rtosdemo.elf rtosdemo.hex rtosdemo.map rtosdemo.bin
+	rm -rf $(TARGET).elf $(TARGET).hex $(TARGET).map $(TARGET).bin
 	touch Makefile
 
 
