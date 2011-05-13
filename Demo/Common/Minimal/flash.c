@@ -133,6 +133,10 @@ unsigned portBASE_TYPE uxLED;
 		vTaskDelayUntil(). */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		vParTestToggleLED( uxLED );
+		/* Becaue the hypervisor is slow, recalculate time since RTOS
+		 * is making use of relative rather than abolute time.
+		 * I have to reconsider that though
+		 */
 		/* Delay for half the flash period then turn the LED off. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		vParTestToggleLED( uxLED );

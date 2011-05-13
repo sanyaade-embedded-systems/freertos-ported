@@ -144,15 +144,6 @@ error. */
 /*-----------------------------------------------------------*/
 
 /*
- * Helper instructions
- */
-
-inline unsigned int RegRead(unsigned int base, unsigned int regOffs);
-inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value);
-inline unsigned int AddrRead(unsigned int base, unsigned int regOffs);
-void dumpinterrupts ( void );
-void dumptimer ( void );
-/*
  * The Beagleboard has 2 LEDS available on the GPIO module
  * I will use LED0 to express errors on tasks
  */
@@ -194,45 +185,20 @@ static void vMemCheckTask( void *pvParameters );
 int main( void )
 {
 	/* Setup the hardware for use with the Beableboard. */
-#ifdef DEBUG
-	serial_putstring("Initializing hardware...");
-#endif
 	prvSetupHardware();
-#ifdef DEBUG
-	serial_putstring("OK");
-	serial_newline();
-#endif
-	/* Start the demo/test application tasks. */
-	/* We need a minimal environment for the hypervisor */
-
-#ifdef DEBUG
-	serial_putstring("Starting Demo applications...");
-#endif
 
 	vStartLEDFlashTasks (mainLED_TASK_PRIORITY);
-#ifndef USE_HYPERVISOR
-	serial_newline();
-	serial_putstring("Starting full test suite...");
+#if USE_HYPERVISOR==0
 	vStartIntegerMathTasks ( tskIDLE_PRIORITY );
 	vStartPolledQueueTasks ( mainQUEUE_POLL_PRIORITY );
 	vStartMathTasks ( tskIDLE_PRIORITY );
 	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartDynamicPriorityTasks();
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
-	serial_putstring("OK");
-	serial_newline();
-	serial_putstring("Starting ErrorControl task...");
 	/* start the check task - which is defined in this file!. */
 	xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
-	serial_putstring("OK");
-	serial_newline();
 #endif
 	
-
-#ifdef DEBUG
-	serial_putstring("OK");
-	serial_newline();
-#endif
 
 	/* Now all the tasks have been stared - start the scheduler.
 	 * NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
@@ -241,14 +207,7 @@ int main( void )
 	 * mode prior to main being called. If you are not using one of these demo application
 	 * projects then ensure Supervisor mode is used here */
 	/* Should never reach here! */
-#ifdef  DEBUG
-	serial_putstring("Starting the scheduler...");
-#endif
 	vTaskStartScheduler();
-#ifdef DEBUG
-	serial_putstring("OK");
-        serial_newline();
-#endif
 	return 0;
 }
 /*-----------------------------------------------------------*/
@@ -257,7 +216,13 @@ static void prvSetupHardware( void )
 {
 
 	/* Initialize GPIOs */
-	vParTestInitialise();
+	/* GPIO5: 31,30,29,28,22,21,15,14,13,12
+	 * GPIO6: 23,10,08,02,01 */
+	(*(REG32(GPIO5_BASE+GPIO_OE))) = ~(PIN31|PIN30|PIN29|PIN28|PIN22|PIN21|PIN15|PIN14|PIN13|PIN12);
+	(*(REG32(GPIO6_BASE+GPIO_OE))) = ~(PIN23|PIN10|PIN8|PIN2|PIN1);
+
+	/* Switch off the leds */
+	(*(REG32(GPIO5_BASE+GPIO_CLEARDATAOUT))) = PIN22|PIN21;
 }
 
 
@@ -313,11 +278,18 @@ void prvToggleOnBoardLED( void )
 {
 	/* Toggle LED0 */
 	unsigned long ulState;
-	ulState = RegRead(GPIO5_BASE,GPIO_DATAIN);
+	unsigned volatile int * gpio;
+	ulState = (*(REG32 (GPIO5_BASE + GPIO_DATAIN)));
 	if( ulState & mainON_BOARD_LED_BIT )
-		RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,mainON_BOARD_LED_BIT);
+	{
+		gpio = (unsigned int *)(GPIO5_BASE + GPIO_SETDATAOUT);
+		*gpio = mainON_BOARD_LED_BIT;
+	}
 	else
-		RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,mainON_BOARD_LED_BIT);
+	{
+		gpio = (unsigned int *)(GPIO5_BASE + GPIO_CLEARDATAOUT);
+		*gpio = mainON_BOARD_LED_BIT;
+	}
 }
 /*-----------------------------------------------------------------------------------------*/
 
@@ -452,137 +424,4 @@ static void vMemCheckTask( void *pvParameters )
 		}
 		xTaskResumeAll();
 	}
-}
-
-
-void dumpinterrupts( void ){
-	serial_newline();
-	serial_putstring("***Interrupt Dump (Memory)***");
-	serial_newline();
-	serial_newline();
-	serial_putstring("SysConfig:0x ");
-	serial_putint(RegRead(MPU_INTC,INTCPS_SYSCONFIG));
-	serial_newline();
-	serial_putstring("SysStatus:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_SYSSTATUS));
-	serial_newline();
-	serial_putstring("SirIRQ:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_SIR_IRQ));
-	serial_newline();
-	serial_putstring("SirFIQ:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_SIR_FIQ));
-	serial_newline();
-	serial_putstring("Control:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_CONTROL));
-	serial_newline();
-	serial_putstring("Protection:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_PROTECTION));
-	serial_newline();
-	serial_putstring("Idle:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_IDLE));
-	serial_newline();
-	serial_putstring("IrqPriority:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_IRQ_PRIORITY));
-	serial_newline();
-	serial_putstring("FiqPriority:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_FIQ_PRIORITY));
-	serial_newline();
-	serial_putstring("Threshold:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_THRESHOLD));
-	serial_newline();
-	serial_putstring("ITR1:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_ITR1));
-	serial_newline();
-	serial_putstring("MIR1:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_MIR1));
-	serial_newline();
-	serial_putstring("ILR37:0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_ILSR37));
-	serial_newline();
-
-}
-
-void dumptimer( void ){
-	serial_newline();
-	serial_putstring("***Timer Dump (Memory)***");
-	serial_newline();
-	serial_newline();
-	serial_putstring("TIDR:0x ");
-	serial_putint(RegRead(GPTI1,GPTI_TIDR));
-	serial_newline();
-	serial_putstring("TIOCP_CFG:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TIOCP_CFG));
-	serial_newline();
-	serial_putstring("TISTAT:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TISTAT));
-	serial_newline();
-	serial_putstring("TISR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TISR));
-	serial_newline();
-	serial_putstring("TIER:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TIER));
-	serial_newline();
-	serial_putstring("TWER:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TWER));
-	serial_newline();
-	serial_putstring("TCLR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TCLR));
-	serial_newline();
-	serial_putstring("TCRR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TCRR));
-	serial_newline();
-	serial_putstring("TLDR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TLDR));
-	serial_newline();
-	serial_putstring("TTGR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TLDR));
-	serial_newline();
-	serial_putstring("TWPS:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TWPS));
-	serial_newline();
-	serial_putstring("TMAR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TMAR));
-	serial_newline();
-	serial_putstring("TCAR1:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TCAR1));
-	serial_newline();
-	serial_putstring("TSICR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TSICR));
-	serial_newline();
-	serial_putstring("TCAR2:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TCAR2));
-	serial_newline();
-	serial_putstring("TPIR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TPIR));
-	serial_newline();
-	serial_putstring("TNIR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TNIR));
-	serial_newline();
-	serial_putstring("TCVR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TCVR));
-	serial_newline();
-	serial_putstring("TOCR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TOCR));
-	serial_newline();
-	serial_putstring("TOWR:0x");
-	serial_putint(RegRead(GPTI1,GPTI_TOWR));
-	serial_newline();
-
-}
-
-
-inline unsigned int RegRead(unsigned int base, unsigned int regOffs)
-{
- 	volatile unsigned int * regPtr = (unsigned int *)(base | regOffs);
-	return *regPtr;
-}
-
-inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value)
-{
-	volatile unsigned int * regPtr = (unsigned int*)(base | regOffs);
-	*regPtr = value;
-}
-
-inline unsigned int AddrRead(unsigned int base, unsigned int regOffs){
-	return (base|regOffs);
 }

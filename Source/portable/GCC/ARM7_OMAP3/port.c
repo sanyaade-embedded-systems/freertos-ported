@@ -205,19 +205,14 @@ static void prvSetupTimerInterrupt( void )
 {
 	unsigned long ulCompareMatch;
 	extern void ( vTickISR )( void );
-	
-	/* Enable IRQ 37 - bit 5 */
-	RegWrite(MPU_INTC,INTCPS_SYSCONFIG,0x00000002);
-	RegWrite(MPU_INTC,INTCPS_IDLE,0x00000001);
+	extern void ( vPortYieldProcessor ) ( void );
 
-	/* Use it if you want to debug the interrupt */
-	//RegWrite(MPU_INTC,INTCPS_ISR_SET1,0x00000020);
-	
-	RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,~(RegRead(MPU_INTC,INTCPS_MIR1))|0x00000020);
-	RegWrite(MPU_INTC,INTCPS_ILSR37,0x34);
-	
-	/* Use it if you ant to debug the IntC registers*/
-	//dumpinterrupts();
+	/* Reset Interrupt Controller */
+	(*(REG32(MPU_INTC + INTCPS_SYSCONFIG))) = 0x00000002;
+	(*(REG32(MPU_INTC + INTCPS_IDLE))) = 0x00000001;
+
+	/* Enable Interrupt 37 which is used for GPTIMER 1 a*/
+	(*(REG32(MPU_INTC + INTCPS_MIR_CLEAR1))) = ~(*(REG32(MPU_INTC + INTCPS_MIR1)))|0x00000020;
 	
 	/* Calculate the match value required for our wanted tick rate */
 	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
@@ -226,6 +221,13 @@ static void prvSetupTimerInterrupt( void )
 	#if portPRESCALE_VALUE != 0
 		ulCompareMatch /= ( portPRESCALE_VALUE +1 );
 	#endif
+	
+	/* Setup Interrupts */
+	E_SWI = ( long ) vPortYieldProcessor;
+	/* Setup interrupt handler */
+	E_IRQ = ( long ) vTickISR;
+
+	
 	/* The timer must be in compare mode, and should be the value
 	 * holded in ulCompareMatch
 	 * bit 0=1 -> enable timer
@@ -233,29 +235,27 @@ static void prvSetupTimerInterrupt( void )
 	 * bit 6=1 -> compare mode
 	 * The source is 32Khz
 	 * */
-	RegWrite(GPTI1,GPTI_TIOCP_CFG,0x2); // reset interface
-	RegWrite(GPTI1,GPTI_TLDR,0); // initial value <- for reload
-	RegWrite(GPTI1,GPTI_TCRR,0); // internal counter value
-	RegWrite(GPTI1,GPTI_TMAR,ulCompareMatch); // load match value
-	/* Use a really big number for debug purposes. Slower IRQs
-	 * will enable you to trace the context switching process
-	 */
-	//RegWrite(GPTI1,GPTI_TMAR, 0x99999999);
-	RegWrite(GPTI1,GPTI_TISR,0);
-	RegWrite(GPTI1,GPTI_TIER,0x1); //enable match interrupt
+	(*(REG32(GPTI1 + GPTI_TIOCP_CFG))) = 0x2; // reset interface
+	(*(REG32(GPTI1 + GPTI_TLDR))) = 0; // initialize the load register
+	(*(REG32(GPTI1 + GPTI_TCRR))) = 0; // initialize counter
+	(*(REG32(GPTI1 + GPTI_TMAR))) = ulCompareMatch; // load match value
+	
+	/* Clear pending matching interrupt (if any) */
+	(*(REG32(GPTI1 + GPTI_TISR))) = 0x1;
+	
+	/* Enable matching interrupts */
+	(*(REG32(GPTI1 + GPTI_TIER))) = 0x1;
 
-	/*
+	/* Timer Control Register
 	 * bit 0 -> start
 	 * bit 1 -> autoreload
 	 * bit 6 -> compare enabled
 	 */
-	RegWrite(GPTI1,GPTI_TCLR,0x00000043);
-	/* Use it if you want to debug timer
-	 * registers */
-	//dumptimer();
+
+	(*(REG32(GPTI1 + GPTI_TCLR))) = 0x43;
 	
-	/* Now that the timer is configured, RESET IT */
-	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer	
+	/* Reset the timer */
+	(*(REG32(GPTI1 + GPTI_TTGR))) = 0xFF;
 
 }
 

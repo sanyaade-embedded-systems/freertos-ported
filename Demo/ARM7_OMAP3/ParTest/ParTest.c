@@ -68,40 +68,13 @@
 #define partstNUM_LEDS			( 1 )
 #define partstALL_OUTPUTS_OFF	( ( unsigned long ) 0xffffffff )
 
-extern inline unsigned int RegRead(unsigned int base, unsigned int regOffs);
-extern inline void RegWrite(unsigned int base, unsigned int regOffs, unsigned int value);
-
-/* Setup Interrupt Vector */
-static void setupInterruptVector( void )
-{
-	extern void ( IRQHandler) ( void );
-	extern void ( vPortYieldProcessor ) ( void );
-	E_SWI = ( long ) vPortYieldProcessor;
-	/* Setup interrupt handler */
-	E_IRQ = ( long ) IRQHandler;
-}
-
 /*-----------------------------------------------------------
  * Simple parallel port IO routines.
  *-----------------------------------------------------------*/
 
-void vParTestInitialise( void )
-{
-	
-	setupInterruptVector();
-
-	/* GPIO5: 31,30,29,28,22,21,15,14,13,12
-	 * GPIO6: 23,10,08,02,01 */
-	RegWrite(GPIO5_BASE,GPIO_OE,~(PIN31|PIN30|PIN29|PIN28|PIN22|PIN21|PIN15|PIN14|PIN13|PIN12));
-	RegWrite(GPIO6_BASE,GPIO_OE,~(PIN23|PIN10|PIN8|PIN2|PIN1));
-
-	/* Switch off the leds */
-	RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,PIN22|PIN21);
-}
-
 void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 {
-	unsigned long GPIO_PIN = 0;
+	unsigned int GPIO_PIN = 0;
 	if( uxLED < partstNUM_LEDS){
 		/* I define LED0 (GPIO_149) as 0
 		 * and 	LED1 (GPIO_150) as 1 */
@@ -111,9 +84,9 @@ void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 			default: break;
 		};
 		if ( xValue )
-			RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,GPIO_PIN);
+			(*(REG32(GPIO5_BASE + GPIO_SETDATAOUT))) = GPIO_PIN;
 		else
-			RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,GPIO_PIN);
+			(*(REG32(GPIO5_BASE + GPIO_CLEARDATAOUT))) = GPIO_PIN;
 	}
 }
 
@@ -131,19 +104,12 @@ void vParTestToggleLED( unsigned portBASE_TYPE uxLED )
 			default: break;
 		};
 
-		ulCurrentState = RegRead(GPIO5_BASE,GPIO_DATAOUT);
+		ulCurrentState = (*(REG32 (GPIO5_BASE + GPIO_DATAOUT)));
 		
-		/* Uncoment the serial_* lines to get some debug info
-		serial_newline();
-		serial_putstring("LED: Current status : ");
-		serial_putint(RegRead(GPIO5_BASE,GPIO_DATAOUT));
-		serial_newline();
-		*/
-
 		/* I have to ignore the rest of the bits */
 		if ( ulCurrentState & GPIO_PIN )
-			RegWrite(GPIO5_BASE,GPIO_CLEARDATAOUT,GPIO_PIN);
+			(*(REG32(GPIO5_BASE + GPIO_CLEARDATAOUT))) = GPIO_PIN;
 		else
-			RegWrite(GPIO5_BASE,GPIO_SETDATAOUT,GPIO_PIN);
+			(*(REG32(GPIO5_BASE + GPIO_SETDATAOUT))) = GPIO_PIN;
 	}
 }

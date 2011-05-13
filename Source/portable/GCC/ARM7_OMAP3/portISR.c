@@ -116,12 +116,11 @@ void vPortISRStartFirstTask( void )
 
 /* Read the incoming interrupt and then jump to the appropriate ISR */
 void IRQHandler ( void ){
-	
 	/* Save the context of the interrupted task. */
 	portSAVE_CONTEXT();	
 
 	/* If this is IRQ_38 then jump to vTickISR */
-	if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==37)
+	if((*(REG32(MPU_INTC + INTCPS_SIR_IRQ))) == 37)
 		__asm volatile ("bl vTickISR");
 //	else if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==74)
 //		__asm volatile ("bl vUART_ISR_Handler");
@@ -161,11 +160,8 @@ void vPortYieldProcessor( void )
  */
 void vTickISR( void )
 {
-	/* Uncomment to get the number of the IRQ
-	serial_newline();
-	serial_putstring("This is interrupt: 0x");
-	serial_putint(RegRead(MPU_INTC,INTCPS_SIR_IRQ));
-	*/
+	
+	portSAVE_CONTEXT();	
 
 	/* Increment the RTOS tick count, then look for the highest priority 
 	task that is ready to run. */
@@ -183,13 +179,16 @@ void vTickISR( void )
 	 * Clear the interrupts
 	 * Page: 1060 
 	 */
-	RegWrite(MPU_INTC,INTCPS_CONTROL,0x1);
 	/* Make sure mask is correct after handling the IRQ */
-    RegWrite(MPU_INTC,INTCPS_MIR_CLEAR1,~(RegRead(MPU_INTC,INTCPS_MIR1))|0x00000020);
-	RegWrite(GPTI1,GPTI_TISR,0x1);  // clear Match interrupt
-	RegWrite(GPTI1,GPTI_TTGR,0xFF); // reset timer 
 
+	(*(REG32(GPTI1 + GPTI_TISR))) = 0x1;  // clear Match interrupt
+	(*(REG32(GPTI1 + GPTI_TTGR))) = 0xFF; // reset timer 
+ 	(*(REG32(MPU_INTC + INTCPS_CONTROL))) = 0x1;
 
+	portRESTORE_CONTEXT();
+
+//	irq = (unsigned int *)(MPU_INTC + INTCPS_MIR_CLEAR1);
+//	*irq = (~(*(REG32(MPU_INTC + INTCPS_MIR1))))|0x00000020;
 }
 /*-----------------------------------------------------------*/
 
