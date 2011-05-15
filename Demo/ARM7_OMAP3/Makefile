@@ -87,6 +87,7 @@ DEMO_SOURCE_DIR=../Common/Minimal
 #
 THUMB_SRC = \
 main.c \
+serial/serial.c \
 ParTest/ParTest.c \
 $(DEMO_SOURCE_DIR)/integer.c \
 $(DEMO_SOURCE_DIR)/flash.c \
@@ -104,9 +105,8 @@ $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/port.c
 #
 # Source files that must be built to ARM mode.
 #
-ARM_SRC = $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c
-
-#serial/serialISR.c
+ARM_SRC = $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c \
+serial/serialISR.c
 
 #
 # Define all object files.

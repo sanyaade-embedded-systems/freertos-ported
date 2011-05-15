@@ -89,12 +89,13 @@
 volatile unsigned long ulCriticalNesting = 9999UL;
 
 /*-----------------------------------------------------------*/
-extern void RegWrite( unsigned int base, unsigned int offset, unsigned int value);
-extern unsigned int RegRead( unsigned int base, unsigned int offset);
 
 /* ISR handler to decide which function to call based on incoming interrupt */
+extern vUART_ISR_Wrapper( void );
 
-void IRQHandler ( void )__attribute__((naked));
+void vTickISR ( void ) __attribute__((noinline));
+
+//void IRQHandler ( void )__attribute__((naked));
 
 /* ISR to handle manual context switches (from a call to taskYIELD()). */
 void vPortYieldProcessor( void ) __attribute__((interrupt("SWI"), naked));
@@ -115,18 +116,21 @@ void vPortISRStartFirstTask( void )
 /*-----------------------------------------------------------*/
 
 /* Read the incoming interrupt and then jump to the appropriate ISR */
-void IRQHandler ( void ){
-	/* Save the context of the interrupted task. */
+void vIRQHandler ( void ){
 	portSAVE_CONTEXT();	
 
 	/* If this is IRQ_38 then jump to vTickISR */
 	if((*(REG32(MPU_INTC + INTCPS_SIR_IRQ))) == 37)
+	{
 		__asm volatile ("bl vTickISR");
-//	else if((RegRead(MPU_INTC,INTCPS_SIR_IRQ))==74)
-//		__asm volatile ("bl vUART_ISR_Handler");
+	}
+	else if((*(REG32(MPU_INTC + INTCPS_SIR_IRQ)))==74)
+	{
+		__asm volatile ("bl vUART_ISR_Wrapper");
+	}
 	
-	/* Restore the context of the new task. */
 	portRESTORE_CONTEXT();
+
 }
 
 
@@ -161,14 +165,17 @@ void vPortYieldProcessor( void )
 void vTickISR( void )
 {
 	
-	portSAVE_CONTEXT();	
+	/* Save LR. Make sure we will be able to go back to the IRQ handler */
+	__asm volatile("push {lr}	\n\t");
 
 	/* Increment the RTOS tick count, then look for the highest priority 
 	task that is ready to run. */
-	__asm volatile( "bl vTaskIncrementTick" );
+	
+
+	__asm volatile("bl vTaskIncrementTick");
 
 	#if configUSE_PREEMPTION == 1
-		__asm volatile( "bl vTaskSwitchContext" );
+		__asm volatile("bl vTaskSwitchContext");
 	#endif
 
 	/* Ready for the next interrupt.
@@ -185,10 +192,8 @@ void vTickISR( void )
 	(*(REG32(GPTI1 + GPTI_TTGR))) = 0xFF; // reset timer 
  	(*(REG32(MPU_INTC + INTCPS_CONTROL))) = 0x1;
 
-	portRESTORE_CONTEXT();
+	__asm volatile("pop {lr}	\n\t");
 
-//	irq = (unsigned int *)(MPU_INTC + INTCPS_MIR_CLEAR1);
-//	*irq = (~(*(REG32(MPU_INTC + INTCPS_MIR1))))|0x00000020;
 }
 /*-----------------------------------------------------------*/
 

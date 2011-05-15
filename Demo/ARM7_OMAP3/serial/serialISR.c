@@ -78,16 +78,14 @@
 #define serCLEAR_VIC_INTERRUPT			( ( unsigned long ) 0 )
 
 /* Constants to determine the ISR source. */
-#define serSOURCE_THRE				((unsigned char)0x1)
-#define serSOURCE_RHR				((unsigned char)0x2)
-#define serSOURCE_RX_TIMEOUT			((unsigned char)0x6)
-#define serSOURCE_SPECIAL_CHAR			((unsigned char)0x8)
-//#define serSOURCE_ERROR				((unsigned char)0x3)
-//#define serSOURCE_THRE					( ( unsigned char ) 0x02 )
-//#define serSOURCE_RX_TIMEOUT			( ( unsigned char ) 0x0c )
-//#define serSOURCE_ERROR					( ( unsigned char ) 0x06 )
-//#define serSOURCE_RX					( ( unsigned char ) 0x04 )
-#define serINTERRUPT_SOURCE_MASK		( ( unsigned char ) 0x1E ) // we only care about bits 5:1
+#define SOURCE_MODEM			((unsigned char)0x0)
+#define SOURCE_THRE				((unsigned char)0x1)
+#define SOURCE_RHR				((unsigned char)0x2)
+#define SOURCE_RX_ERROR			((unsigned char)0x3)
+#define SOURCE_RX_TIMEOUT		((unsigned char)0x6)
+#define SOURCE_SPECIAL_CHAR		((unsigned char)0x8)
+#define SOURCE_CTS_RTS			((unsigned char)0x10)
+#define INTERRUPT_SOURCE_MASK	((unsigned char)0x1E) // we only care about bits 5:1
 
 /* Queues used to hold received characters, and characters waiting to be
 transmitted. */
@@ -103,7 +101,9 @@ static volatile long lTHREEmpty;
  */
 void vSerialISRCreateQueues( unsigned portBASE_TYPE uxQueueLength, xQueueHandle *pxRxedChars, xQueueHandle *pxCharsForTx, long volatile **pplTHREEmptyFlag );
 
-/* UART0 interrupt service routine handler. */
+/* UART3 interrupt service routine entry point. */
+void vUART_ISR_Wrapper( void ) __attribute__ ((naked));
+/* UART3 interrupt service routine handler. */
 void vUART_ISR_Handler( void ) __attribute__ ((noinline));
 
 /*-----------------------------------------------------------*/
@@ -125,22 +125,31 @@ void vSerialISRCreateQueues(	unsigned portBASE_TYPE uxQueueLength, xQueueHandle 
 }
 /*-----------------------------------------------------------*/
 
+void vUART_ISR_Wrapper( void )
+{
+	/* Save the context of the interrupted task. */
+	portSAVE_CONTEXT();
+
+	/* Call the handler.  This must be a separate function from the wrapper
+	to ensure the correct stack frame is set up. */
+	__asm volatile ("bl vUART_ISR_Handler");
+
+	/* Restore the context of whichever task is going to run next. */
+	portRESTORE_CONTEXT();
+}
+/*-----------------------------------------------------------*/
+
 void vUART_ISR_Handler( void )
 {
 	signed char cChar;
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
 	unsigned char *const rhr = (unsigned char*)(SERIAL_BASE + RHR_REG);
-	volatile unsigned char *const lsr = (unsigned char*)(SERIAL_BASE + LSR_REG);
 
 	/* What caused the interrupt? */
-	switch( RegRead(SERIAL_BASE,IIR_REG) & serINTERRUPT_SOURCE_MASK )
+	switch( *(REG32(SERIAL_BASE + IIR_REG)) & INTERRUPT_SOURCE_MASK )
 	{
-		case serSOURCE_ERROR :	/* Not handling this, but clear the interrupt. */
-								cChar = UART0_LSR;
-								break;
-
-		case serSOURCE_THRE	:	/* The THRE is empty.  If there is another
+		case SOURCE_THRE	:	/* The THRE is empty.  If there is another
 								character in the Tx queue, send it now. */
 								if( xQueueReceiveFromISR( xCharsForTx, &cChar, &xHigherPriorityTaskWoken ) == pdTRUE )
 								{
@@ -155,15 +164,20 @@ void vUART_ISR_Handler( void )
 								}
 								break;
 
-		case serSOURCE_RX_TIMEOUT :
-		case serSOURCE_RX	:	/* A character was received.  Place it in 
+		case SOURCE_RHR	:	/* A character was received.  Place it in 
 								the queue of received characters. */
 								cChar = *rhr;
 								xQueueSendFromISR( xRxedChars, &cChar, &xHigherPriorityTaskWoken );
 								break;
 
-		default				:	/* There is nothing to do, leave the ISR. */
-								break;
+		
+		case SOURCE_MODEM:
+		case SOURCE_RX_ERROR:
+		case SOURCE_RX_TIMEOUT:
+		case SOURCE_SPECIAL_CHAR:
+		case SOURCE_CTS_RTS:
+		default	: // unhandled interrupts
+				break;
 	}
 
 	if( xHigherPriorityTaskWoken )
@@ -171,9 +185,9 @@ void vUART_ISR_Handler( void )
 		portYIELD_FROM_ISR();
 	}
 
-	/* Clear the ISR in the VIC. */
-	//VICVectAddr = serCLEAR_VIC_INTERRUPT;
-	RegWrite(MPU_INTC,INTCPS_ISR_CLEAR2,0x00000400);
+	/* Clear UART interrupt */
+
+	*(REG32(MPU_INTC + INTCPS_CONTROL)) = 0x1;
 }
 
 

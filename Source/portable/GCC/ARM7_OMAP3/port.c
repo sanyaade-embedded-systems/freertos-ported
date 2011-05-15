@@ -204,15 +204,16 @@ void vPortEndScheduler( void )
 static void prvSetupTimerInterrupt( void )
 {
 	unsigned long ulCompareMatch;
-	extern void ( vTickISR )( void );
+	extern void ( vIRQHandler )( void );
 	extern void ( vPortYieldProcessor ) ( void );
 
 	/* Reset Interrupt Controller */
 	(*(REG32(MPU_INTC + INTCPS_SYSCONFIG))) = 0x00000002;
 	(*(REG32(MPU_INTC + INTCPS_IDLE))) = 0x00000001;
 
-	/* Enable Interrupt 37 which is used for GPTIMER 1 a*/
-	(*(REG32(MPU_INTC + INTCPS_MIR_CLEAR1))) = ~(*(REG32(MPU_INTC + INTCPS_MIR1)))|0x00000020;
+	/* Enable Interrupt 37 which is used for GPTIMER 1 and interrupt 74 for UART3*/
+	(*(REG32(MPU_INTC + INTCPS_MIR_CLEAR1))) = ~(*(REG32(MPU_INTC + INTCPS_MIR1)))|0x20;
+	(*(REG32(MPU_INTC + INTCPS_MIR_CLEAR2))) = ~(*(REG32(MPU_INTC + INTCPS_MIR2)))|0x400;
 	
 	/* Calculate the match value required for our wanted tick rate */
 	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
@@ -225,7 +226,7 @@ static void prvSetupTimerInterrupt( void )
 	/* Setup Interrupts */
 	E_SWI = ( long ) vPortYieldProcessor;
 	/* Setup interrupt handler */
-	E_IRQ = ( long ) vTickISR;
+	E_IRQ = ( long ) vIRQHandler;
 
 	
 	/* The timer must be in compare mode, and should be the value
