@@ -93,9 +93,8 @@ volatile unsigned long ulCriticalNesting = 9999UL;
 /* ISR handler to decide which function to call based on incoming interrupt */
 extern vUART_ISR_Wrapper( void );
 
-void vTickISR ( void ) __attribute__((noinline));
-
-//void IRQHandler ( void )__attribute__((naked));
+void vTickISR ( void ) __attribute__((naked));
+void IRQHandler ( void )__attribute__((naked));
 
 /* ISR to handle manual context switches (from a call to taskYIELD()). */
 void vPortYieldProcessor( void ) __attribute__((interrupt("SWI"), naked));
@@ -126,7 +125,7 @@ void vIRQHandler ( void ){
 	}
 	else if((*(REG32(MPU_INTC + INTCPS_SIR_IRQ)))==74)
 	{
-		__asm volatile ("bl vUART_ISR_Wrapper");
+		__asm volatile ("bl vUART_ISR_Handler");
 	}
 	
 	portRESTORE_CONTEXT();
