@@ -81,6 +81,8 @@ Changes from V1.2.3
 	+ A division has been included in the calculation.
 */
 
+extern void serial_putstring(char * c);
+
 #include <stdlib.h>
 
 /* Scheduler include files. */
@@ -142,6 +144,9 @@ volatile signed portBASE_TYPE *pxTaskHasExecuted;
 	/* Keep performing a calculation and checking the result against a constant. */
 	for( ;; )
 	{
+#ifdef OUTPUT_MSG
+		serial_putstring("Integer Task");
+#endif
 		/* Perform the calculation.  This will store partial value in
 		registers, resulting in a good test of the context switch mechanism. */
 		lValue = intgCONST1;

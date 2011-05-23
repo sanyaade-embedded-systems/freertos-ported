@@ -215,6 +215,9 @@ short sErrorEverOccurred = pdFALSE;
 
 	for( ;; )
 	{		
+#ifdef OUTPUT_MSG
+		serial_putstring("Block queue task");
+#endif
 		if( xQueueSend( pxQueueParameters->xQueue, ( void * ) &usValue, pxQueueParameters->xBlockTime ) != pdPASS )
 		{
 			sErrorEverOccurred = pdTRUE;

@@ -51,13 +51,17 @@
 #    licensing and training services.
 #*/
 
-USE_THUMB_MODE=NO
-USE_HYPERVISOR=0  # use 1 or 0 only
+USE_THUMB_MODE=YES
+# use 1 or 0 only
+USE_HYPERVISOR=0
 DEBUG=-g
 OPTIM=-O0
 RUN_MODE=RUN_FROM_RAM
 LDSCRIPT=omap3-ram.ld
 TEXT_BASE = 0x80300000
+
+# use this to print debug messages for task interleaving
+DBGMSG=YES
 
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
@@ -78,6 +82,10 @@ ifeq ($(USE_THUMB_MODE),YES)
 	THUMB_FLAGS=-mthumb
 endif
 
+ifeq ($(DBGMSG),YES)
+	CFLAGS += -D OUTPUT_MSG
+endif
+
 LINKER_FLAGS=-Xlinker -o$(TARGET).elf -Xlinker -M -Xlinker -Map=$(TARGET).map
 
 RTOS_SOURCE_DIR=../../Source
@@ -88,6 +96,7 @@ DEMO_SOURCE_DIR=../Common/Minimal
 THUMB_SRC = \
 main.c \
 serial/serial.c \
+serial/myserial.c \
 ParTest/ParTest.c \
 $(DEMO_SOURCE_DIR)/integer.c \
 $(DEMO_SOURCE_DIR)/flash.c \

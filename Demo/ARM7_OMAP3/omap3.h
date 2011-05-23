@@ -41,7 +41,6 @@ void serial_putint_nozeros(unsigned int nr);
 void serial_putbyte(unsigned char nr);
 int printableChar(char c);
 
-
 /* Default RAM Exception handlers
  * Custom Handlers So I will use 
  * secondary addresses */

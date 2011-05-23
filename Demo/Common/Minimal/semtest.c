@@ -110,6 +110,8 @@ typedef struct SEMAPHORE_PARAMETERS
 static volatile short sCheckVariables[ semtstNUM_TASKS ] = { 0 };
 static volatile short sNextCheckVariable = 0;
 
+extern void serial_putstring(char * c);
+
 /*-----------------------------------------------------------*/
 
 void vStartSemaphoreTasks( unsigned portBASE_TYPE uxPriority )
@@ -203,6 +205,10 @@ short sError = pdFALSE, sCheckVariableToUse;
 
 	for( ;; )
 	{
+		
+#ifdef OUTPUT_MSG
+		serial_putstring("Semaphore Task");
+#endif
 		/* Try to obtain the semaphore. */
 		if( xSemaphoreTake( pxParameters->xSemaphore, pxParameters->xBlockTime ) == pdPASS )
 		{

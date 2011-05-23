@@ -109,6 +109,8 @@ static portTASK_FUNCTION_PROTO( vPolledQueueConsumer, pvParameters );
 errors. */
 static volatile signed portBASE_TYPE xPollingConsumerCount = pollqINITIAL_VALUE, xPollingProducerCount = pollqINITIAL_VALUE;
 
+extern void serial_putstring(char * c);
+
 /*-----------------------------------------------------------*/
 
 void vStartPolledQueueTasks( unsigned portBASE_TYPE uxPriority )
@@ -139,6 +141,9 @@ signed portBASE_TYPE xError = pdFALSE, xLoop;
 
 	for( ;; )
 	{		
+#ifdef OUTPUT_MSG
+		serial_putstring("Polled Queue Task");
+#endif
 		for( xLoop = 0; xLoop < pollqVALUES_TO_PRODUCE; xLoop++ )
 		{
 			/* Send an incrementing number on the queue without blocking. */

@@ -83,6 +83,8 @@
 the rate at which they should flash the LED. */
 static volatile unsigned portBASE_TYPE uxFlashTaskNumber = 0;
 
+extern void serial_putstring(char * c);
+
 /* The task that is created three times. */
 static portTASK_FUNCTION_PROTO( vLEDFlashTask, pvParameters );
 
@@ -129,6 +131,9 @@ unsigned portBASE_TYPE uxLED;
 	xLastFlashTime = xTaskGetTickCount();
 	for(;;)
 	{
+#ifdef OUTPUT_MSG
+		serial_putstring("Led task");
+#endif
 		/* We need to initialise xLastFlashTime prior to the first call to 
 		vTaskDelayUntil(). */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
