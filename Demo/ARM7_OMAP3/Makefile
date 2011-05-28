@@ -51,7 +51,7 @@
 #    licensing and training services.
 #*/
 
-USE_THUMB_MODE=NO
+USE_THUMB_MODE=YES
 # use 1 or 0 only
 USE_HYPERVISOR=0
 DEBUG=-g
@@ -73,7 +73,7 @@ WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align
 #
 # CFLAGS common to both the THUMB and ARM mode builds
 
-CFLAGS=$(WARNINGS) -D DEBUG -D $(RUN_MODE) -D USE_HYPERVISOR=$(USE_HYPERVISOR) -D GCC_ARM7 -I. -I../../Source/include \
+CFLAGS=$(WARNINGS) -D DEBUG -D $(RUN_MODE) -D USE_HYPERVISOR=$(USE_HYPERVISOR) -D GCC_ARM7_OMAP3 -I. -I../../Source/include \
 		-I../Common/include $(DEBUG) -mcpu=cortex-a8 -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
 	 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
 

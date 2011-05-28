@@ -236,6 +236,10 @@
 	#include "..\..\Source\portable\Softune\MB96340\portmacro.h"
 #endif
 
+#ifdef GCC_ARM7_OMAP3
+	#include "../../Source/portable/GCC/ARM7_OMAP3/portmacro.h"
+#endif
+
 #ifdef BCC_INDUSTRIAL_PC_PORT
 	/* A short file name has to be used in place of the normal
 	FreeRTOSConfig.h when using the Borland compiler. */
