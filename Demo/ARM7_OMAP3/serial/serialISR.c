@@ -79,13 +79,14 @@
 
 /* Constants to determine the ISR source. */
 #define SOURCE_MODEM			((unsigned char)0x0)
+
 #define SOURCE_THRE				((unsigned char)0x1)
 #define SOURCE_RHR				((unsigned char)0x2)
 #define SOURCE_RX_ERROR			((unsigned char)0x3)
 #define SOURCE_RX_TIMEOUT		((unsigned char)0x6)
 #define SOURCE_SPECIAL_CHAR		((unsigned char)0x8)
 #define SOURCE_CTS_RTS			((unsigned char)0x10)
-#define INTERRUPT_SOURCE_MASK	((unsigned char)0x1E) // we only care about bits 5:1
+#define INTERRUPT_SOURCE_MASK	((unsigned char)0x3E) // we only care about bits 5:1
 
 /* Queues used to hold received characters, and characters waiting to be
 transmitted. */
@@ -141,13 +142,17 @@ void vUART_ISR_Wrapper( void )
 
 void vUART_ISR_Handler( void )
 {
+	
+	/* Save LR. Make sure we will be able to go back to the IRQ handler */
+	__asm volatile("push {lr}	\n\t");
+
 	signed char cChar;
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
 	unsigned char *const rhr = (unsigned char*)(SERIAL_BASE + RHR_REG);
 
 	/* What caused the interrupt? */
-	switch( *(REG32(SERIAL_BASE + IIR_REG)) & INTERRUPT_SOURCE_MASK )
+	switch( (*(REG32(SERIAL_BASE + IIR_REG)) & INTERRUPT_SOURCE_MASK) >> 1 )
 	{
 		case SOURCE_THRE	:	/* The THRE is empty.  If there is another
 								character in the Tx queue, send it now. */
@@ -188,6 +193,9 @@ void vUART_ISR_Handler( void )
 	/* Clear UART interrupt */
 
 	*(REG32(MPU_INTC + INTCPS_CONTROL)) = 0x1;
+
+	__asm volatile("pop {lr}	\n\t");
+
 }
 
 

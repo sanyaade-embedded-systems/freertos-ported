@@ -145,7 +145,7 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 		*(REG32(SERIAL_BASE + EFR_REG)) = efr|0x10;
 
 		/* Switch to mode A */
-		*(REG32(SERIAL_BASE + MCR_REG)) = 0x80;
+		*(REG32(SERIAL_BASE + LCR_REG)) = 0x80;
 		
 		/* Save 6th bit of MCR Register */
 		mcr = *(REG32(SERIAL_BASE + MCR_REG)) & 0x40;
@@ -296,8 +296,13 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 		 */
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0x7;
 
+		/* Mask everything */
+		*(REG32(SERIAL_BASE + WER_REG)) = 0x5F;
+		
+		*(REG32(SERIAL_BASE + TCR_REG)) = 0xF;
+		
 		/* Load new mode */
-		*(REG32(SERIAL_BASE + MDR1_REG)) = 0x0;
+		*(REG32(SERIAL_BASE + MDR1_REG)) = 0x7;
 
 
 		}	

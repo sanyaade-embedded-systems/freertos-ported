@@ -51,7 +51,7 @@
 #    licensing and training services.
 #*/
 
-USE_THUMB_MODE=YES
+USE_THUMB_MODE=NO
 # use 1 or 0 only
 USE_HYPERVISOR=0
 DEBUG=-g
@@ -61,7 +61,7 @@ LDSCRIPT=omap3-ram.ld
 TEXT_BASE = 0x80300000
 
 # use this to print debug messages for task interleaving
-DBGMSG=YES
+DBGMSG=NO
 
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy

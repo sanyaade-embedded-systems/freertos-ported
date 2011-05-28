@@ -4,13 +4,14 @@ void __attribute__((noinline)) serial_putchar(char c)
 {
   volatile unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
   volatile unsigned char *const lsr = (unsigned char*)(SERIAL_BASE + LSR_REG);
+  volatile unsigned char *const fcr = (unsigned char*)(SERIAL_BASE + FCR_REG);
   int count=0;
   while (0 == (*lsr & 0x20))
   {
   count++;
   /* Clear the damn FIFO anyway */
   if(count==100)
-  	*(REG32(SERIAL_BASE + FCR_REG)) = 0x2;
+  	*fcr = 0x2;
   }
   *thr = c;
   return;
