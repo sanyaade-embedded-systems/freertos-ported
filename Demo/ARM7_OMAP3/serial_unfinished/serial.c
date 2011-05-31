@@ -136,54 +136,68 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 		
 		/* FIFOS and DMA Settings 17.5.1.1.2 */
 		/* Swich to mode B */
-		lcr=(*(REG32(SERIAL_BASE + LCR_REG)));
+		lcr=*(REG32(SERIAL_BASE + LCR_REG));
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0xBF;
 
-		/* Save 4th bit (ENHANCED_EN) of EFR_REG register */
-		efr = *(REG32(SERIAL_BASE + EFR_REG)) & 0x10;
+		/* Save EFR_REG register */
+		efr = *(REG32(SERIAL_BASE + EFR_REG));
 		/* Enable enhanced features */
-		*(REG32(SERIAL_BASE + EFR_REG)) = efr|0x10;
+		*(REG32(SERIAL_BASE + EFR_REG)) |= 0x10;
 
 		/* Switch to mode A */
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0x80;
 		
-		/* Save 6th bit of MCR Register */
-		mcr = *(REG32(SERIAL_BASE + MCR_REG)) & 0x40;
-		*(REG32(SERIAL_BASE + MCR_REG)) = mcr|0x40;
+		/* Set loopback mode */
+		*(REG32(SERIAL_BASE + MCR_REG)) &= ~0x10;
+		*(REG32(SERIAL_BASE + MCR_REG)) |= 0x3;
+
+		*(REG32(SERIAL_BASE + WER_REG)) |= 0x1;
+		
+		/* Save MCR Register */
+		mcr = *(REG32(SERIAL_BASE + MCR_REG));
+		*(REG32(SERIAL_BASE + MCR_REG)) |= 0x40;
 			
-		/* Enable Fifo, clear Tx/Rx */
+		/* Enable Fifo, set trigger levels p2696. Trigger levels are ignored for now.*/
 		*(REG32(SERIAL_BASE + FCR_REG)) = 0x7;
+		while( (*(REG32(SERIAL_BASE + FCR_REG)) & 0x6) != 0) {;}
+		*(REG32(SERIAL_BASE + FCR_REG)) = 0x0;
 
 		/* Switch to mode B */
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0xBF;
 
-		/* Setup trigger levels for interrupt generation */
+		/* Setup trigger levels for interrupt generation to 0. p2710 */
 		*(REG32(SERIAL_BASE + TLR_REG)) = 0x0;
-		*(REG32(SERIAL_BASE + SCR_REG)) = 0x0;
+		*(REG32(SERIAL_BASE + SCR_REG)) |= 0x3F;
 
 		/* Restore efr value */
-		*(REG32(SERIAL_BASE + EFR_REG)) = ~(*REG32(SERIAL_BASE + EFR_REG)) & efr;
+		*(REG32(SERIAL_BASE + EFR_REG)) = efr;
 
 		/* Switch to mode A */
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0x80;
 
 		/* Restore MCR register */
-		*(REG32(SERIAL_BASE + MCR_REG)) = ~(*REG32(SERIAL_BASE + MCR_REG )) & mcr;
+		*(REG32(SERIAL_BASE + MCR_REG)) = mcr;
 
 		/* Restore LCR */
 		*(REG32(SERIAL_BASE + LCR_REG)) = lcr;
+		
+		*(REG32(SERIAL_BASE + RHR_REG )) = 0;
+		*(REG32(SERIAL_BASE + THR_REG )) = 0;
+		*(REG32(SERIAL_BASE + LSR_REG ));
+		*(REG32(SERIAL_BASE + MSR_REG ));
+		*(REG32(SERIAL_BASE + IIR_REG ));
 
 		/*----------- 17.5.1.1.3 (page 2682 )--------- */
 
 		/* Disable UART access */
-		*(REG32(SERIAL_BASE + MDR1_REG)) = 0x7;
+		*(REG32(SERIAL_BASE + MDR1_REG)) |= 0x7;
 
 		/* Switch to mode B */
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0xBF;
 
 		/* Enable access to IER_REG */
-		efr = *(REG32(SERIAL_BASE + EFR_REG)) & 0x10;
-		*(REG32(SERIAL_BASE + EFR_REG)) = efr|0x10;
+		efr = *(REG32(SERIAL_BASE + EFR_REG));
+		*(REG32(SERIAL_BASE + EFR_REG)) |= 0x10;
 
 		/* Switch to register operational mode */
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0x0;
@@ -287,23 +301,17 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0xBF;
 
 		/* Restore EFR */
-		*(REG32(SERIAL_BASE + EFR_REG)) = ~(*REG32(SERIAL_BASE + EFR_REG)) & efr;
+		*(REG32(SERIAL_BASE + EFR_REG)) = efr;
 
 		/* Load Protocol Format
 		 * 8 bits length
 		 * 1 stop bit
 		 * no parity
 		 */
-		*(REG32(SERIAL_BASE + LCR_REG)) = 0x7;
+		*(REG32(SERIAL_BASE + LCR_REG)) = 0x3;
 
-		/* Mask everything */
-		*(REG32(SERIAL_BASE + WER_REG)) = 0x5F;
-		
-		*(REG32(SERIAL_BASE + TCR_REG)) = 0xF;
-		
 		/* Load new mode */
-		*(REG32(SERIAL_BASE + MDR1_REG)) = 0x7;
-
+		*(REG32(SERIAL_BASE + MDR1_REG)) = 0x0;
 
 		}	
 		portEXIT_CRITICAL();
@@ -357,7 +365,6 @@ signed portBASE_TYPE xReturn;
 
 	/* This demo driver only supports one port so the parameter is not used. */
 	( void ) pxPort;
-	 unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
 	portENTER_CRITICAL();
 	{
 		/* Is there space to write directly to the UART? */
@@ -366,7 +373,7 @@ signed portBASE_TYPE xReturn;
 			/* We wrote the character directly to the UART, so was 
 			successful. */
 			*plTHREEmpty = pdFALSE;
-			 *thr = cOutChar;
+			*(REG32(SERIAL_BASE + THR_REG)) = cOutChar;
 			xReturn = pdPASS;
 		}
 		else 

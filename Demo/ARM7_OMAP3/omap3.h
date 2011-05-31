@@ -304,7 +304,7 @@ int printableChar(char c);
 #define MSR_REG					0x018
 #define TCR_REG					0x018
 #define XOFF1_REG				0x018
-#define SPR_REG					0x018
+#define SPR_REG					0x01C
 #define TLR_REG					0x01C
 #define XOFF2_REG				0x01C
 #define MDR1_REG				0x020
@@ -317,7 +317,7 @@ int printableChar(char c);
 #define RXFLL_REG				0x030
 #define SFREGH_REG				0x034
 #define RXFLH_REG				0x034
-#define UASR_REG				0x034
+#define UASR_REG				0x038
 #define BLR_REG					0x038
 #define ACREG_REG				0x03C
 #define SCR_REG					0x040

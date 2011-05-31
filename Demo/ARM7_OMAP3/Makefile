@@ -51,7 +51,7 @@
 #    licensing and training services.
 #*/
 
-USE_THUMB_MODE=YES
+USE_THUMB_MODE=NO
 # use 1 or 0 only
 USE_HYPERVISOR=0
 DEBUG=-g
@@ -95,8 +95,8 @@ DEMO_SOURCE_DIR=../Common/Minimal
 #
 THUMB_SRC = \
 main.c \
-serial/serial.c \
-serial/myserial.c \
+serial_unfinished/serial.c \
+serial_unfinished/myserial.c \
 ParTest/ParTest.c \
 $(DEMO_SOURCE_DIR)/integer.c \
 $(DEMO_SOURCE_DIR)/flash.c \
@@ -116,7 +116,7 @@ $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/port.c
 # Source files that must be built to ARM mode.
 #
 ARM_SRC = $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c \
-serial/serialISR.c
+serial_unfinished/serialISR.c
 
 #
 # Define all object files.

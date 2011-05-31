@@ -75,12 +75,20 @@
 void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 {
 	unsigned int GPIO_PIN = 0;
-	if( uxLED < partstNUM_LEDS){
+	if( uxLED <= partstNUM_LEDS){
 		/* I define LED0 (GPIO_149) as 0
 		 * and 	LED1 (GPIO_150) as 1 */
 		switch(uxLED){
-			case 0: GPIO_PIN=PIN21;break;
-			case 1: GPIO_PIN=PIN22;break;
+			case 0: 
+				{
+					GPIO_PIN=PIN21;
+					break;
+				}
+			case 1: 
+				{
+					GPIO_PIN=PIN22;
+					break;
+				}
 			default: break;
 		};
 		if ( xValue )
@@ -90,26 +98,44 @@ void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 	}
 }
 
+/* This function is called by Common/Minimal/flash.c (Led Task)
+ * The Led Task spawns 3 tasks, each tasks handling a separate led.
+ * TI Beagleboard, has only 2 leds, so the 3rd task should do nothing
+ */
+
 void vParTestToggleLED( unsigned portBASE_TYPE uxLED )
 {
-	unsigned long ulCurrentState, GPIO_PIN=0;
-	if( uxLED < partstNUM_LEDS )
+	volatile unsigned long ulCurrentState, GPIO_PIN=0;
+	if( uxLED <= partstNUM_LEDS )
 	{
 		/* Toggle LED Status
 		 * LED0 = GPIO_149
 		 * LED1 = GPIO_150 */
 		switch(uxLED){
-			case 0: GPIO_PIN=PIN21;break;
-			case 1: GPIO_PIN=PIN22;break;
-			default: break;
+			case 0: 
+				{
+					GPIO_PIN=PIN21;
+					break;
+				}
+			case 1: 
+				{
+					GPIO_PIN=PIN22;
+					break;
+				}
+			default: 
+				{
+					// Don't do nothing
+					break;
+				}
 		};
-
-		ulCurrentState = (*(REG32 (GPIO5_BASE + GPIO_DATAOUT)));
-		
-		/* I have to ignore the rest of the bits */
-		if ( ulCurrentState & GPIO_PIN )
-			(*(REG32(GPIO5_BASE + GPIO_CLEARDATAOUT))) = GPIO_PIN;
-		else
-			(*(REG32(GPIO5_BASE + GPIO_SETDATAOUT))) = GPIO_PIN;
 	}
+
+	ulCurrentState = (*(REG32 (GPIO5_BASE + GPIO_DATAOUT)));
+		
+	/* I have to ignore the rest of the bits */
+	if ( ulCurrentState & GPIO_PIN )
+		(*(REG32(GPIO5_BASE + GPIO_CLEARDATAOUT))) |= GPIO_PIN;
+	else
+		(*(REG32(GPIO5_BASE + GPIO_SETDATAOUT))) |= GPIO_PIN;
+	
 }

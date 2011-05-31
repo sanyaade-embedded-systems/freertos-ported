@@ -143,7 +143,7 @@ error. */
 
 /* This is for Serial Task */
 #define mainCOM_TEST_BAUD_RATE		( ( unsigned long ) 115200 )
-#define mainCOM_TEST_LED			( 2 )
+#define mainCOM_TEST_LED			( 1 )
 /*-----------------------------------------------------------*/
 
 /*
@@ -192,7 +192,7 @@ int main( void )
 
 	vStartLEDFlashTasks (mainLED_TASK_PRIORITY);
 #if USE_HYPERVISOR==0
-	//vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
+	vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
 	vStartIntegerMathTasks ( tskIDLE_PRIORITY );
 	vStartPolledQueueTasks ( mainQUEUE_POLL_PRIORITY );
 	vStartMathTasks ( tskIDLE_PRIORITY );

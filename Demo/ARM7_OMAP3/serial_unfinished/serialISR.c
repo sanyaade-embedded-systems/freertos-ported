@@ -148,8 +148,9 @@ void vUART_ISR_Handler( void )
 
 	signed char cChar;
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-	unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
-	unsigned char *const rhr = (unsigned char*)(SERIAL_BASE + RHR_REG);
+	volatile unsigned char *const thr = (unsigned char*)(SERIAL_BASE + THR_REG);
+	volatile unsigned char *const rhr = (unsigned char*)(SERIAL_BASE + RHR_REG);
+	volatile unsigned char *const lsr = (unsigned char*)(SERIAL_BASE + LSR_REG);
 
 	/* What caused the interrupt? */
 	switch( (*(REG32(SERIAL_BASE + IIR_REG)) & INTERRUPT_SOURCE_MASK) >> 1 )
@@ -158,6 +159,8 @@ void vUART_ISR_Handler( void )
 								character in the Tx queue, send it now. */
 								if( xQueueReceiveFromISR( xCharsForTx, &cChar, &xHigherPriorityTaskWoken ) == pdTRUE )
 								{
+									
+									while( (*lsr & 0x20) == 0){;}
 									*thr = cChar;
 								}
 								else
