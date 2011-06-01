@@ -148,8 +148,7 @@ xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned port
 		*(REG32(SERIAL_BASE + LCR_REG)) = 0x80;
 		
 		/* Set loopback mode */
-		*(REG32(SERIAL_BASE + MCR_REG)) &= ~0x10;
-		*(REG32(SERIAL_BASE + MCR_REG)) |= 0x3;
+		*(REG32(SERIAL_BASE + MCR_REG)) |= 0x13;
 
 		*(REG32(SERIAL_BASE + WER_REG)) |= 0x1;
 		

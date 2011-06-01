@@ -53,7 +53,6 @@
 
 USE_THUMB_MODE=NO
 # use 1 or 0 only
-USE_HYPERVISOR=0
 DEBUG=-g
 OPTIM=-O0
 RUN_MODE=RUN_FROM_RAM
@@ -73,17 +72,13 @@ WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align
 #
 # CFLAGS common to both the THUMB and ARM mode builds
 
-CFLAGS=$(WARNINGS) -D DEBUG -D $(RUN_MODE) -D USE_HYPERVISOR=$(USE_HYPERVISOR) -D GCC_ARM7_OMAP3 -I. -I../../Source/include \
+CFLAGS=$(WARNINGS) -D DEBUG -D $(RUN_MODE) -D GCC_ARM7_OMAP3 -I. -I../../Source/include \
 		-I../Common/include $(DEBUG) -mcpu=cortex-a8 -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
 	 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
 
 ifeq ($(USE_THUMB_MODE),YES)
 	CFLAGS += -mthumb-interwork -D THUMB_INTERWORK
 	THUMB_FLAGS=-mthumb
-endif
-
-ifeq ($(DBGMSG),YES)
-	CFLAGS += -D OUTPUT_MSG
 endif
 
 LINKER_FLAGS=-Xlinker -o$(TARGET).elf -Xlinker -M -Xlinker -Map=$(TARGET).map
@@ -95,8 +90,7 @@ DEMO_SOURCE_DIR=../Common/Minimal
 #
 THUMB_SRC = \
 main.c \
-serial_unfinished/serial.c \
-serial_unfinished/myserial.c \
+serial_unsupported/serial.c \
 ParTest/ParTest.c \
 $(DEMO_SOURCE_DIR)/integer.c \
 $(DEMO_SOURCE_DIR)/flash.c \
@@ -116,7 +110,7 @@ $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/port.c
 # Source files that must be built to ARM mode.
 #
 ARM_SRC = $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c \
-serial_unfinished/serialISR.c
+serial_unsupported/serialISR.c
 
 #
 # Define all object files.
