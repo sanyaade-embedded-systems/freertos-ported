@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V6.1.1 - Copyright (C) 2011 Real Time Engineers Ltd.
+    FreeRTOS V7.0.1 - Copyright (C) 2011 Real Time Engineers Ltd.
 
     ***************************************************************************
     *                                                                         *
@@ -83,19 +83,6 @@
  * allocates and frees memory just to give the allocator a bit more exercise.
  *
  */
-
-/* 
-	Changes from V2.4.2
-
-	+ The vErrorChecks() task now dynamically creates then deletes a task each
-	  cycle.  This tests the operation of the memory allocator.
-
-	Changes from V2.5.2
-		
-	+ vParTestInitialise() is called during initialisation to ensure all the 
-	  LED's start off.
-*/
-
 
 /* Standard includes. */
 #include <stdlib.h>

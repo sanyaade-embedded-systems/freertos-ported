@@ -1,7 +1,7 @@
 #ifndef omap3_h
 #define omap3_h
 /*******************************************************************************
-omap3h - Register defs for TI BeagleBoard C4
+omap3h - Register definitions for TI BeagleBoard C4
            
 THE SOFTWARE IS DELIVERED "AS IS" WITHOUT WARRANTY OR CONDITION OF ANY KIND, 
 EITHER EXPRESS, IMPLIED OR STATUTORY. THIS INCLUDES WITHOUT LIMITATION ANY 
@@ -41,9 +41,7 @@ void serial_putint_nozeros(unsigned int nr);
 void serial_putbyte(unsigned char nr);
 int printableChar(char c);
 
-/* Default RAM Exception handlers
- * Custom Handlers So I will use 
- * secondary addresses */
+/* Default RAM Exception handlers */
 #define E_UNDEFINED				(*(REG32 (0x4020FFE4)))
 #define E_SWI					(*(REG32 (0x4020FFE8)))
 #define E_PREFETCH				(*(REG32 (0x4020FFEC)))

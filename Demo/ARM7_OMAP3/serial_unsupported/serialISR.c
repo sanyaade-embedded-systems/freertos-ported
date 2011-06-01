@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V6.1.1 - Copyright (C) 2011 Real Time Engineers Ltd.
+    FreeRTOS V7.0.1 - Copyright (C) 2011 Real Time Engineers Ltd.
 
     ***************************************************************************
     *                                                                         *
@@ -53,7 +53,7 @@
 
 
 /* 
-	BASIC INTERRUPT DRIVEN SERIAL PORT DRIVER FOR UART0. 
+	BASIC INTERRUPT DRIVEN SERIAL PORT DRIVER FOR UART3. 
 
 	This file contains all the serial port components that must be compiled
 	to ARM mode.  The components that can be compiled to either ARM or THUMB
@@ -73,9 +73,6 @@
 #include "serial.h"
 
 /*-----------------------------------------------------------*/
-
-/* Constant to access the VIC. */
-#define serCLEAR_VIC_INTERRUPT			( ( unsigned long ) 0 )
 
 /* Constants to determine the ISR source. */
 #define SOURCE_MODEM			((unsigned char)0x0)

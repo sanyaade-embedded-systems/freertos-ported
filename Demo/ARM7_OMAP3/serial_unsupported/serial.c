@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V6.1.1 - Copyright (C) 2011 Real Time Engineers Ltd.
+    FreeRTOS V7.0.1 - Copyright (C) 2011 Real Time Engineers Ltd.
 
     ***************************************************************************
     *                                                                         *
@@ -52,7 +52,7 @@
 */
 
 /*
-	BASIC INTERRUPT DRIVEN SERIAL PORT DRIVER FOR UART0. 
+	BASIC INTERRUPT DRIVEN SERIAL PORT DRIVER FOR UART3. 
 
 	This file contains all the serial port components that can be compiled to
 	either ARM or THUMB mode.  Components that must be compiled to ARM mode are
@@ -72,21 +72,7 @@
 
 /*-----------------------------------------------------------*/
 
-/* Constants to setup and access the UART. */
-#define serDLAB							( ( unsigned char ) 0x80 )
-#define serENABLE_INTERRUPTS			( ( unsigned char ) 0x03 )
-#define serNO_PARITY					( ( unsigned char ) 0x00 )
-#define ser1_STOP_BIT					( ( unsigned char ) 0x00 )
-#define ser8_BIT_CHARS					( ( unsigned char ) 0x03 )
-#define serFIFO_ON						( ( unsigned char ) 0x01 )
-#define serCLEAR_FIFO					( ( unsigned char ) 0x06 )
-#define serWANTED_CLOCK_SCALING			( ( unsigned long ) 16 )
-
-/* Constants to setup and access the VIC. */
-#define serUART0_VIC_CHANNEL			( ( unsigned long ) 0x0006 )
-#define serUART0_VIC_CHANNEL_BIT		( ( unsigned long ) 0x0040 )
-#define serUART0_VIC_ENABLE				( ( unsigned long ) 0x0020 )
-#define serCLEAR_VIC_INTERRUPT			( ( unsigned long ) 0 )
+/* Contants to setup Queues */
 
 #define serINVALID_QUEUE				( ( xQueueHandle ) 0 )
 #define serHANDLE						( ( xComPortHandle ) 1 )

@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V6.1.1 - Copyright (C) 2011 Real Time Engineers Ltd.
+    FreeRTOS V7.0.1 - Copyright (C) 2011 Real Time Engineers Ltd.
 
     ***************************************************************************
     *                                                                         *
@@ -72,6 +72,7 @@
 #define configUSE_PREEMPTION	1		
 #define configUSE_IDLE_HOOK		0
 #define configUSE_TICK_HOOK		0
+
 /* This is the deal with the clocks
  *
  * The MPU_DLL clock is calculated by 
@@ -88,6 +89,7 @@
  * N = 12
  * hence MPU_DLL = (26 * 500 * 2)/13  = 1000000000
  */
+
 #define configCPU_CLOCK_HZ		( ( unsigned long ) 26000000 )
 #define configTICK_RATE_HZ		( ( portTickType ) 1000 ) 
 #define configMAX_PRIORITIES		( ( unsigned portBASE_TYPE ) 5 )
