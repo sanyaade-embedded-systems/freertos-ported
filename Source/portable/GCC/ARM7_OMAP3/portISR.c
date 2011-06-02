@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V6.1.1 - Copyright (C) 2011 Real Time Engineers Ltd.
+    FreeRTOS V7.0.1 - Copyright (C) 2011 Real Time Engineers Ltd.
 
     ***************************************************************************
     *                                                                         *
@@ -58,31 +58,8 @@
  * to ARM mode, are contained in this file.
  *----------------------------------------------------------*/
 
-/*
-	Changes from V2.5.2
-		
-	+ The critical section management functions have been changed.  These no
-	  longer modify the stack and are safe to use at all optimisation levels.
-	  The functions are now also the same for both ARM and THUMB modes.
-
-	Changes from V2.6.0
-
-	+ Removed the 'static' from the definition of vNonPreemptiveTick() to 
-	  allow the demo to link when using the cooperative scheduler.
-
-	Changes from V3.2.4
-
-	+ The assembler statements are now included in a single asm block rather
-	  than each line having its own asm block.
-*/
-
-
 /* Scheduler includes. */
 #include "FreeRTOS.h"
-
-/* Constants required to handle interrupts. */
-#define portTIMER_MATCH_ISR_BIT		( ( unsigned char ) 0x01 )
-#define portCLEAR_VIC_INTERRUPT		( ( unsigned long ) 0 )
 
 /* Constants required to handle critical sections. */
 #define portNO_CRITICAL_NESTING		( ( unsigned long ) 0 )
@@ -91,10 +68,10 @@ volatile unsigned long ulCriticalNesting = 9999UL;
 /*-----------------------------------------------------------*/
 
 /* ISR handler to decide which function to call based on incoming interrupt */
-extern vUART_ISR_Wrapper( void );
+extern void vUART_ISR_Wrapper( void );
 
 void vTickISR ( void ) __attribute__((naked));
-void IRQHandler ( void )__attribute__((naked));
+void vIRQHandler ( void )__attribute__((naked));
 
 /* ISR to handle manual context switches (from a call to taskYIELD()). */
 void vPortYieldProcessor( void ) __attribute__((interrupt("SWI"), naked));
