@@ -73,24 +73,7 @@
 #define configUSE_IDLE_HOOK		0
 #define configUSE_TICK_HOOK		0
 
-/* This is the deal with the clocks
- *
- * The MPU_DLL clock is calculated by 
- * MPU_DLL=(SYS_CLK x M x 2)/((N+1) x M2)
- *
- * Where
- * SYS_CLK = register(0x48306D40) page 562
- * and
- * register(0x48004940) page 441.
- * Based on that, the clock parameters are the following
- * SYS_CLK=26Mhz
- * M1 = 500
- * M2 = 1
- * N = 12
- * hence MPU_DLL = (26 * 500 * 2)/13  = 1000000000
- */
-
-#define configCPU_CLOCK_HZ		( ( unsigned long ) 26000000 )
+#define configCPU_CLOCK_HZ		( ( unsigned long ) 8000000 )
 #define configTICK_RATE_HZ		( ( portTickType ) 1000 ) 
 #define configMAX_PRIORITIES		( ( unsigned portBASE_TYPE ) 5 )
 #define configMINIMAL_STACK_SIZE	( ( unsigned short ) 128 )
