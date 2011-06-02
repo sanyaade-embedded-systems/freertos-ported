@@ -104,12 +104,12 @@ $(RTOS_SOURCE_DIR)/tasks.c \
 $(RTOS_SOURCE_DIR)/queue.c \
 $(RTOS_SOURCE_DIR)/list.c \
 $(RTOS_SOURCE_DIR)/portable/MemMang/heap_2.c \
-$(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/port.c
+$(RTOS_SOURCE_DIR)/portable/GCC/OMAP3_BeagleBoard/port.c
 
 #
 # Source files that must be built to ARM mode.
 #
-ARM_SRC = $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_OMAP3/portISR.c \
+ARM_SRC = $(RTOS_SOURCE_DIR)/portable/GCC/OMAP3_BeagleBoard/portISR.c \
 serial_unsupported/serialISR.c
 
 #

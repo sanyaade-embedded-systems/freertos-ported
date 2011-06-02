@@ -237,7 +237,7 @@
 #endif
 
 #ifdef GCC_ARM7_OMAP3
-	#include "../../Source/portable/GCC/ARM7_OMAP3/portmacro.h"
+	#include "../../Source/portable/GCC/OMAP3_BeagleBoard/portmacro.h"
 #endif
 
 #ifdef BCC_INDUSTRIAL_PC_PORT
