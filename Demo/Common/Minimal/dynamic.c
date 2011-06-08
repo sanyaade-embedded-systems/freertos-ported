@@ -233,7 +233,7 @@ unsigned portBASE_TYPE uxOurPriority;
 	for( ;; )
 	{
 #ifdef OUTPUT_MSG
-		serial_putstring("Dymaic Task");
+		serial_putstring("Dynamic Task");
 #endif
 		/* Raise our priority above the controller task to ensure a context
 		switch does not occur while we are accessing this variable. */
