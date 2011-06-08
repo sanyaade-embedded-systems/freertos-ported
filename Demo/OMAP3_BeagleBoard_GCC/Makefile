@@ -52,7 +52,8 @@
 #*/
 
 USE_THUMB_MODE=NO
-# use 1 or 0 only
+# use 1 or 0 only. This will skip the serial part
+USE_HYPERVISOR=1
 DEBUG=-g
 OPTIM=-O0
 RUN_MODE=RUN_FROM_RAM
@@ -60,7 +61,7 @@ LDSCRIPT=omap3-ram.ld
 TEXT_BASE = 0x80300000
 
 # use this to print debug messages for task interleaving
-DBGMSG=NO
+DBGMSG=YES
 
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
@@ -72,13 +73,17 @@ WARNINGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align
 #
 # CFLAGS common to both the THUMB and ARM mode builds
 
-CFLAGS=$(WARNINGS) -D DEBUG -D $(RUN_MODE) -D GCC_OMAP3_BeagleBoard -I. -I../../Source/include \
+CFLAGS=$(WARNINGS) -D DEBUG -D $(RUN_MODE) -D USE_HYPERVISOR=$(USE_HYPERVISOR) -D GCC_OMAP3_BeagleBoard -I. -I../../Source/include \
 		-I../Common/include $(DEBUG) -mcpu=cortex-a8 -T$(LDSCRIPT) -Ttext $(TEXT_BASE) \
 	 $(OPTIM) -fomit-frame-pointer -fno-strict-aliasing
 
 ifeq ($(USE_THUMB_MODE),YES)
 	CFLAGS += -mthumb-interwork -D THUMB_INTERWORK
 	THUMB_FLAGS=-mthumb
+endif
+
+ifeq ($(DBGMSG),YES)
+	CFLAGS += -D OUTPUT_MSG
 endif
 
 LINKER_FLAGS=-Xlinker -o$(TARGET).elf -Xlinker -M -Xlinker -Map=$(TARGET).map
@@ -91,6 +96,7 @@ DEMO_SOURCE_DIR=../Common/Minimal
 THUMB_SRC = \
 main.c \
 serial_unsupported/serial.c \
+serial_unsupported/myserial.c \
 ParTest/ParTest.c \
 $(DEMO_SOURCE_DIR)/integer.c \
 $(DEMO_SOURCE_DIR)/flash.c \

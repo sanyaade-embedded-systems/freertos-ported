@@ -178,7 +178,9 @@ int main( void )
 	prvSetupHardware();
 
 	vStartLEDFlashTasks (mainLED_TASK_PRIORITY);
+#if USE_HYPERVISOR==0
 	vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
+#endif
 	vStartIntegerMathTasks ( tskIDLE_PRIORITY );
 	vStartPolledQueueTasks ( mainQUEUE_POLL_PRIORITY );
 	vStartMathTasks ( tskIDLE_PRIORITY );
