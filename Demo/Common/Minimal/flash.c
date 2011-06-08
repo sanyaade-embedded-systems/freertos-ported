@@ -133,6 +133,9 @@ unsigned portBASE_TYPE uxLED;
 
 	for(;;)
 	{
+#ifdef OUTPUT_MSG
+		serial_putstring("Flash Task");
+#endif
 		/* Delay for half the flash period then turn the LED on. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		vParTestToggleLED( uxLED );

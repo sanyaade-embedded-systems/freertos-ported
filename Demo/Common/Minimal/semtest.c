@@ -203,6 +203,9 @@ short sError = pdFALSE, sCheckVariableToUse;
 
 	for( ;; )
 	{
+#ifdef OUTPUT_MSG
+		serial_putstring("Semaphore Task");
+#endif
 		/* Try to obtain the semaphore. */
 		if( xSemaphoreTake( pxParameters->xSemaphore, pxParameters->xBlockTime ) == pdPASS )
 		{

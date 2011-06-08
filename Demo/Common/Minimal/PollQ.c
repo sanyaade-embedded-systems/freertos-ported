@@ -139,6 +139,9 @@ signed portBASE_TYPE xError = pdFALSE, xLoop;
 
 	for( ;; )
 	{		
+#ifdef OUTPUT_MSG
+		serial_putstring("PollQueue Task");
+#endif
 		for( xLoop = 0; xLoop < pollqVALUES_TO_PRODUCE; xLoop++ )
 		{
 			/* Send an incrementing number on the queue without blocking. */

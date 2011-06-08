@@ -60,5 +60,6 @@ void vParTestInitialise( void );
 void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue );
 void vParTestToggleLED( unsigned portBASE_TYPE uxLED );
 
+extern void serial_putstring(char * c);
 #endif
 

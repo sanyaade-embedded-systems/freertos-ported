@@ -124,6 +124,9 @@ short sError = pdFALSE;
 	/* Keep performing a calculation and checking the result against a constant. */
 	for(;;)
 	{
+#ifdef OUTPUT_MSG
+		serial_putstring("Math Task");
+#endif
 		d1 = 123.4567;
 		d2 = 2345.6789;
 		d3 = -918.222;
