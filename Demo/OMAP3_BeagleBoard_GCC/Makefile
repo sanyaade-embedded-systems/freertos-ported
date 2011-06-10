@@ -51,7 +51,7 @@
 #    licensing and training services.
 #*/
 
-USE_THUMB_MODE=YES
+USE_THUMB_MODE=NO
 # use 1 or 0 only. This will skip the serial part
 USE_HYPERVISOR=1
 DEBUG=-g
