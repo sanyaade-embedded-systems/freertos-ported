@@ -54,6 +54,7 @@
 USE_THUMB_MODE=NO
 # use 1 or 0 only. This will skip the serial part
 USE_HYPERVISOR=1
+BENCH=YES
 DEBUG=-g
 OPTIM=-O0
 RUN_MODE=RUN_FROM_RAM
@@ -61,7 +62,7 @@ LDSCRIPT=omap3-ram.ld
 TEXT_BASE = 0x80300000
 
 # use this to print debug messages for task interleaving
-DBGMSG=YES
+DBGMSG=NO
 
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
@@ -84,6 +85,10 @@ endif
 
 ifeq ($(DBGMSG),YES)
 	CFLAGS += -D OUTPUT_MSG
+endif
+
+ifeq ($(BENCH),YES)
+	CFLAGS += -D BENCH
 endif
 
 LINKER_FLAGS=-Xlinker -o$(TARGET).elf -Xlinker -M -Xlinker -Map=$(TARGET).map

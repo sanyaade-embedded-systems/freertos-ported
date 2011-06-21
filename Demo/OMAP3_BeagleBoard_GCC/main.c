@@ -178,6 +178,9 @@ int main( void )
 	prvSetupHardware();
 
 	vStartLEDFlashTasks (mainLED_TASK_PRIORITY);
+
+#ifndef BENCH
+
 #if USE_HYPERVISOR==0
 	vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
 #endif
@@ -189,6 +192,8 @@ int main( void )
 	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
 	/* start the check task - which is defined in this file!. */
 	xTaskCreate( vErrorChecks, ( signed char *) "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+
+#endif
 
 	/* Now all the tasks have been stared - start the scheduler.
 	 * NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
